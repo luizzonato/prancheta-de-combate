@@ -31,6 +31,9 @@ const PADRAO = () => ({
   cargas: cargasPadrao(),
   feitos: {},
   ultimoBackup: null,
+  medidasBase: { peso: 100, cintura: 108, peito: 114, quadril: 108, ombro: 54, biceps: 41.5, braco: 144, coxa: 66 },
+  metaCintura: 90,
+  avatar: { pele: 2, semCamiseta: false, ampliar: true },
 });
 
 /* ---------- datas ---------- */
@@ -56,8 +59,10 @@ let dados = carregar();
 let sel = indiceDia(new Date());
 let abaAtual = "Hoje";
 let fichaSel = FICHA_DO_DIA[sel];
+let simCintura = null; // prévia do boneco, não é salva
 
 function ehObj(x) { return !!x && typeof x === "object" && !Array.isArray(x); }
+function clampNum(v, a, b) { return Math.max(a, Math.min(b, v)); }
 function num(x, pad) { return typeof x === "number" && isFinite(x) ? x : pad; }
 
 // aceita dados do localStorage ou de um backup: valida, completa o que faltar e descarta lixo
@@ -81,14 +86,26 @@ function normalizar(d) {
     cargas: {},
     feitos: {},
     ultimoBackup: typeof d.ultimoBackup === "string" ? d.ultimoBackup : null,
+    medidasBase: {},
+    metaCintura: clampNum(num(d.metaCintura, base.metaCintura), 50, 200),
+    avatar: {
+      pele: ehObj(d.avatar) ? clampNum(num(d.avatar.pele, 2) | 0, 0, PELES.length - 1) : 2,
+      semCamiseta: !!(ehObj(d.avatar) && d.avatar.semCamiseta),
+      ampliar: ehObj(d.avatar) ? d.avatar.ampliar !== false : true,
+    },
   };
+  Object.keys(base.medidasBase).forEach((k) => { out.medidasBase[k] = num(ehObj(d.medidasBase) ? d.medidasBase[k] : undefined, base.medidasBase[k]); });
   if (ehObj(d.log)) Object.keys(d.log).forEach((k) => { if (/^\d{4}-\d{2}-\d{2}$/.test(k)) out.log[k] = Math.max(0, Math.min(100, num(d.log[k], 0))); });
   Object.keys(base.medidas).forEach((k) => { out.medidas[k] = num(ehObj(d.medidas) ? d.medidas[k] : undefined, base.medidas[k]); });
   if (Array.isArray(d.historico)) {
     out.historico = d.historico
       .filter((r) => ehObj(r) && /^\d{4}-\d{2}-\d{2}$/.test(r.data))
       .slice(-200)
-      .map((r) => ({ data: r.data, cintura: num(r.cintura, 0), peso: num(r.peso, 0) }));
+      .map((r) => {
+        const o = { data: r.data, cintura: num(r.cintura, 0), peso: num(r.peso, 0) };
+        ["peito", "quadril", "ombro", "biceps", "braco", "coxa"].forEach((k) => { if (typeof r[k] === "number" && isFinite(r[k])) o[k] = r[k]; });
+        return o;
+      });
   } else out.historico = base.historico;
   out.cargas = ehObj(d.cargas) ? {} : base.cargas;
   if (ehObj(d.cargas)) Object.keys(d.cargas).forEach((k) => { if (typeof d.cargas[k] === "string" || typeof d.cargas[k] === "number") out.cargas[k] = String(d.cargas[k]).slice(0, 12); });
@@ -184,6 +201,7 @@ function render() {
   renderMatriz();
   renderMedidas();
   if (abaAtual === "Treinos") renderFicha();
+  if (abaAtual === "Avatar") renderAvatar();
   if (abaAtual === "Backup") renderBackup();
   salvar();
 }
@@ -404,9 +422,10 @@ $("btnExport").onclick = () => {
 /* ---------- abas ---------- */
 function irParaAba(nome) {
   abaAtual = nome;
-  ["Hoje", "Treinos", "Backup"].forEach((n) => { $("view" + n).hidden = n !== nome; });
+  ["Hoje", "Treinos", "Avatar", "Backup"].forEach((n) => { $("view" + n).hidden = n !== nome; });
   document.querySelectorAll("#tabbar button").forEach((b) => b.classList.toggle("on", b.dataset.tab === nome));
   if (nome === "Treinos") renderFicha();
+  if (nome === "Avatar") renderAvatar();
   if (nome === "Backup") renderBackup();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
@@ -504,6 +523,103 @@ function cartaoExercicio(it) {
   inp.onchange = () => aviso("Carga salva: " + it.nome.split(" (")[0] + (inp.value ? " · " + inp.value + " " + it.un : ""));
   return el;
 }
+
+/* ---------- boneco ---------- */
+function renderAvatar() {
+  const ins = calcularInsights(dados);
+  const m = simCintura === null ? dados.medidas : Object.assign({}, dados.medidas, { cintura: simCintura });
+  const prog = simCintura === null ? ins.progresso : calcularInsights(Object.assign({}, dados, { medidas: m })).progresso;
+  $("avSvg").innerHTML = desenharAvatar(m, dados.medidasBase, {
+    ampliar: dados.avatar.ampliar, pele: dados.avatar.pele, semCamiseta: dados.avatar.semCamiseta, progresso: prog,
+  });
+  $("avStage").textContent = ins.estagio;
+  $("avShirt").checked = dados.avatar.semCamiseta;
+  $("avAmp").checked = dados.avatar.ampliar;
+
+  const sk = $("avSkin");
+  sk.innerHTML = "";
+  PELES.forEach((cor, i) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.style.background = cor;
+    b.className = i === dados.avatar.pele ? "sel" : "";
+    b.setAttribute("aria-label", "Tom de pele " + (i + 1));
+    b.onclick = () => { dados.avatar.pele = i; salvar(); renderAvatar(); };
+    sk.appendChild(b);
+  });
+
+  const sim = $("avSim");
+  const mn = Math.floor(Math.min(dados.metaCintura, dados.medidas.cintura) - 5);
+  const mx = Math.ceil(Math.max(dados.medidasBase.cintura, dados.medidas.cintura) + 5);
+  sim.min = String(mn); sim.max = String(mx);
+  sim.value = String(simCintura === null ? dados.medidas.cintura : simCintura);
+  $("avSimVal").textContent = (simCintura === null ? dados.medidas.cintura : simCintura) + " cm" + (simCintura === null ? " (real)" : " (prévia)");
+
+  $("avBar").style.width = Math.round(ins.progresso * 100) + "%";
+  if (document.activeElement !== $("avMeta")) $("avMeta").value = dados.metaCintura;
+  $("avFalta").textContent = ins.falta > 0 ? "Faltam " + ins.falta + " cm para a meta (" + Math.round(ins.progresso * 100) + "% do caminho)" : "Meta atingida";
+  $("avForecast").textContent = ins.previsao;
+
+  const dl = $("avDeltas");
+  dl.innerHTML = "";
+  [["cintura", "Cintura"], ["peso", "Peso"], ["peito", "Peito"], ["biceps", "Bíceps"], ["coxa", "Coxa"], ["ombro", "Ombro"]].forEach(([k, rot]) => {
+    const d = ins.dif(k);
+    const el = document.createElement("div");
+    el.className = "dl";
+    el.innerHTML = "<span></span><b></b>";
+    el.querySelector("span").textContent = rot;
+    const b = el.querySelector("b");
+    b.textContent = (d > 0 ? "+" : "") + d + (k === "peso" ? " kg" : " cm");
+    // cintura/peso descendo é bom; os demais subindo é bom
+    const bom = k === "cintura" || k === "peso" ? d < 0 : d > 0;
+    if (d !== 0) b.className = bom ? "neg" : "pos";
+    el.appendChild(b);
+    dl.appendChild(el);
+  });
+
+  const form = $("avForm");
+  if (!form.children.length) {
+    CAMPOS_MEDIDA.forEach(([k, rot, un]) => {
+      const lb = document.createElement("label");
+      lb.textContent = rot + " (" + un + ")";
+      const inp = document.createElement("input");
+      inp.type = "number"; inp.step = "0.1"; inp.inputMode = "decimal"; inp.id = "mf_" + k;
+      lb.appendChild(inp);
+      form.appendChild(lb);
+    });
+  }
+  CAMPOS_MEDIDA.forEach(([k]) => { const i = $("mf_" + k); if (document.activeElement !== i) i.value = dados.medidas[k]; });
+}
+
+$("avShirt").onchange = (e) => { dados.avatar.semCamiseta = e.target.checked; salvar(); renderAvatar(); };
+$("avAmp").onchange = (e) => { dados.avatar.ampliar = e.target.checked; salvar(); renderAvatar(); };
+$("avSim").oninput = (e) => { simCintura = parseFloat(e.target.value); renderAvatar(); };
+$("avSimReset").onclick = () => { simCintura = null; renderAvatar(); };
+$("avMeta").onchange = (e) => {
+  const v = parseFloat(e.target.value);
+  if (!isNaN(v) && v >= 50 && v <= 200) { dados.metaCintura = v; salvar(); aviso("Meta de cintura: " + v + " cm"); }
+  renderAvatar();
+};
+$("avSave").onclick = () => {
+  const novo = Object.assign({}, dados.medidas);
+  let erro = null;
+  CAMPOS_MEDIDA.forEach(([k, rot]) => {
+    const v = parseFloat($("mf_" + k).value);
+    if (isNaN(v) || v <= 0 || v > 400) erro = erro || rot;
+    else novo[k] = v;
+  });
+  if (erro) { aviso("Confira o campo: " + erro); return; }
+  dados.medidas = novo;
+  const hoje = iso(new Date());
+  const reg = Object.assign({ data: hoje }, { cintura: novo.cintura, peso: novo.peso, peito: novo.peito, quadril: novo.quadril, ombro: novo.ombro, biceps: novo.biceps, braco: novo.braco, coxa: novo.coxa });
+  const ult = dados.historico[dados.historico.length - 1];
+  if (ult && ult.data === hoje) dados.historico[dados.historico.length - 1] = reg; else dados.historico.push(reg);
+  const prox = new Date(); prox.setDate(prox.getDate() + 15);
+  dados.proximaMedicao = iso(prox);
+  simCintura = null;
+  render();
+  aviso("Medidas salvas. O boneco já mudou");
+};
 
 /* ---------- backup ---------- */
 function montarBackup() {

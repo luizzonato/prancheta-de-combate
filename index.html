@@ -107,6 +107,46 @@
       </section>
     </div>
 
+    <!-- ========== ABA AVATAR ========== -->
+    <div id="viewAvatar" class="view" hidden>
+      <section class="card">
+        <div class="card-head">
+          <h3>MEU BONECO</h3>
+          <span class="chip" id="avStage">—</span>
+        </div>
+        <div class="av-stage"><div id="avSvg" class="av-svg"></div></div>
+        <p class="muted small av-legend"><i class="dash"></i>linha tracejada = você em 12/10 (início). O boneco é a sua versão de hoje.</p>
+        <div class="av-toggles">
+          <label class="sw"><input type="checkbox" id="avShirt" /><span>Sem camiseta</span></label>
+          <label class="sw"><input type="checkbox" id="avAmp" /><span>Ampliar mudanças (2×)</span></label>
+        </div>
+        <div class="av-skin" id="avSkin" role="radiogroup" aria-label="Tom de pele"></div>
+        <div class="av-sim">
+          <label for="avSim">PRÉVIA: <b id="avSimVal">—</b> de cintura</label>
+          <input type="range" id="avSim" min="70" max="120" step="0.5" />
+          <button type="button" class="link-btn" id="avSimReset">voltar para a medida real</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head"><h3>EVOLUÇÃO</h3><span class="muted small">desde 12/10</span></div>
+        <div class="goal">
+          <div class="goal-top"><span>Meta de cintura</span><span class="meta-in"><input id="avMeta" type="number" step="0.5" inputmode="decimal" /> cm</span></div>
+          <div class="bar-big"><i id="avBar"></i></div>
+          <p class="muted small" id="avFalta"></p>
+          <p class="forecast" id="avForecast"></p>
+        </div>
+        <div id="avDeltas" class="deltas"></div>
+        <p class="muted small av-note">O boneco é ilustrativo. Gominhos aparecem quando o percentual de gordura cai, e a cintura é só um sinal disso. Cinta, balança e espelho juntos contam a história completa.</p>
+      </section>
+
+      <section class="card">
+        <div class="card-head"><h3>ATUALIZAR MEDIDAS</h3><span class="muted small">a cada 15 dias</span></div>
+        <form id="avForm" class="mgrid"></form>
+        <div class="bk-actions"><button class="btn lime" id="avSave" type="button">SALVAR MEDIDAS</button></div>
+      </section>
+    </div>
+
     <!-- ========== ABA BACKUP ========== -->
     <div id="viewBackup" class="view" hidden>
       <section class="card">
@@ -138,12 +178,14 @@
   <nav class="tabbar" id="tabbar" aria-label="Seções">
     <button data-tab="Hoje" class="on" type="button"><i>◉</i><span>HOJE</span></button>
     <button data-tab="Treinos" type="button"><i>▤</i><span>TREINOS</span></button>
+    <button data-tab="Avatar" type="button"><i>☻</i><span>BONECO</span></button>
     <button data-tab="Backup" type="button"><i>⇅</i><span>BACKUP</span></button>
   </nav>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <canvas id="fx" aria-hidden="true"></canvas>
   <script src="treinos.js"></script>
+  <script src="avatar.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
