@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0a0d0b" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Prancheta" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <title>Prancheta de Combate</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <header class="top">
+      <div>
+        <p class="eyebrow"><span class="pulse"></span>PROTOCOLO CUTTING ATIVO</p>
+        <h1>PRANCHETA<br /><em>DE COMBATE</em></h1>
+      </div>
+      <div class="top-actions">
+        <button class="icon-btn" id="btnExport" aria-label="Exportar CSV" title="Exportar CSV">⇩</button>
+        <button class="icon-btn danger" id="btnReset" aria-label="Zerar semana" title="Zerar semana">↺</button>
+      </div>
+    </header>
+
+    <nav class="week" id="weekStrip" aria-label="Dias da semana"></nav>
+
+    <section class="hero">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 120 120" class="ring" aria-hidden="true">
+          <circle cx="60" cy="60" r="52" class="ring-bg" />
+          <circle cx="60" cy="60" r="52" class="ring-fg" id="ringFg" />
+        </svg>
+        <div class="ring-center">
+          <strong id="ringPct">0%</strong>
+          <span id="ringCount">0/0</span>
+        </div>
+      </div>
+      <div class="hero-info">
+        <p class="tag" id="dayName">—</p>
+        <h2 id="workoutTitle">—</h2>
+        <p class="muted" id="workoutSub">—</p>
+        <div class="chips">
+          <span class="chip fire"><b id="streak">0</b> dias de sequência</span>
+          <span class="chip"><b id="weekAvg">0%</b> na semana</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <h3>MISSÕES DO DIA</h3>
+        <span class="muted small" id="missionsHint">toque para concluir</span>
+      </div>
+      <ul id="missions" class="missions"></ul>
+      <form id="addForm" class="add">
+        <input id="newHabit" type="text" placeholder="Nova meta: creatina 5g, 10 mil passos…" maxlength="60" autocomplete="off" />
+        <button type="submit" aria-label="Adicionar meta">+</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <h3>CURVA DA SEMANA</h3>
+        <span class="legend"><i class="dot g"></i>concluído <i class="dot a"></i>corte 80%</span>
+      </div>
+      <div id="chart" class="chart"></div>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <h3>MATRIZ 7 DIAS</h3>
+        <span class="muted small">toque numa célula</span>
+      </div>
+      <div class="matrix-scroll"><table id="matrix" class="matrix"></table></div>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <h3>FITA MÉTRICA</h3>
+        <span class="chip purple" id="countdown">—</span>
+      </div>
+      <div id="measures" class="measures"></div>
+      <form id="measureForm" class="measure-form">
+        <input id="inWaist" type="number" step="0.5" inputmode="decimal" placeholder="Cintura (cm)" />
+        <input id="inWeight" type="number" step="0.1" inputmode="decimal" placeholder="Peso (kg)" />
+        <button type="submit">REGISTRAR</button>
+      </form>
+      <div id="waistHistory" class="history"></div>
+    </section>
+
+    <footer class="foot">Dados salvos só neste aparelho · funciona offline</footer>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <canvas id="fx" aria-hidden="true"></canvas>
+  <script src="app.js"></script>
+</body>
+</html>
