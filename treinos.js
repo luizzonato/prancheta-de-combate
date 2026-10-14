@@ -25,6 +25,26 @@ const FICHA = {
       { nome: "Cardio pós-treino", descanso: "", itens: [CARDIO_POS("a8")] },
     ],
   },
+  D: {
+    tab: "D", titulo: "Treino D · Empurrar leve", sub: "Peito, ombros e tríceps com volume reduzido",
+    cardio: "15 a 20 min pós-treino (Zona 2)",
+    fases: [
+      { nome: "Peitoral · segunda frequência da semana", descanso: "90 s", itens: [
+        { id: "d1", nome: "Supino reto com halteres", series: "3 × 10–12", nota: "Carga moderada, uns 70% do que você usa na segunda. Descida de 2 s, sem buscar a falha.", un: "kg", q: "execucao+correta+supino+reto+halteres" },
+        { id: "d2", nome: "Supino inclinado na máquina", series: "3 × 10–12", nota: "Ângulo diferente do treino A para variar o estímulo na parte superior do peitoral.", un: "kg", q: "execucao+correta+supino+inclinado+maquina" },
+        { id: "d3", nome: "Crucifixo na polia (cross-over)", series: "3 × 12–15", nota: "Tensão contínua e fechamento à frente do peito, apertando 1 s no centro.", un: "kg", q: "execucao+correta+crossover+polia+peito" },
+      ] },
+      { nome: "Ombros · foco no deltoide lateral", descanso: "60 s", itens: [
+        { id: "d4", nome: "Desenvolvimento com halteres sentado", series: "3 × 10–12", nota: "Carga moderada, core travado e sem arquear a lombar.", un: "kg", q: "execucao+correta+desenvolvimento+halteres+sentado" },
+        { id: "d5", nome: "Elevação lateral (halteres ou polia)", series: "4 × 15–20", nota: "Repetições altas, movimento guiado pelos cotovelos, sem balançar o tronco.", un: "kg", q: "execucao+correta+elevacao+lateral" },
+      ] },
+      { nome: "Tríceps · finalização", descanso: "60 s", itens: [
+        { id: "d6", nome: "Tríceps francês na polia ou halter", series: "3 × 12–15", nota: "Cotovelos apontados para frente, alongando bem a cabeça longa.", un: "kg", q: "execucao+correta+triceps+frances" },
+        { id: "d7", nome: "Tríceps pulley (corda)", series: "3 × 12–15", nota: "Cotovelos fixos ao lado do corpo, abrindo a corda no fim.", un: "kg", q: "execucao+correta+triceps+corda+polia" },
+      ] },
+      { nome: "Cardio pós-treino", descanso: "", itens: [CARDIO_POS("d8")] },
+    ],
+  },
   CORE: {
     tab: "Core", titulo: "Cardio + Core pesado", sub: "Parede abdominal na polia",
     cardio: "40 a 45 min contínuos (Zona 2)",
@@ -87,9 +107,9 @@ const FICHA = {
   },
 };
 
-const ORDEM_FICHA = ["A", "B", "C", "CORE", "CARDIO"];
+const ORDEM_FICHA = ["A", "B", "C", "D", "CORE", "CARDIO"];
 // segunda..domingo → ficha do dia
-const FICHA_DO_DIA = ["A", "CORE", "B", "CARDIO", "C", "B", "CARDIO"];
+const FICHA_DO_DIA = ["A", "CORE", "B", "CARDIO", "C", "D", "CARDIO"];
 
 const PROTOCOLO_DIARIO = [
   ["Ao acordar (em jejum)", "5 séries de 15 a 20 s de stomach vacuum para ativar o transverso abdominal."],

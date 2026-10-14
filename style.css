@@ -181,8 +181,8 @@ h1 em { font-style: normal; color: var(--lime); }
 .link-btn:hover { text-decoration: underline; }
 
 /* ---------- ficha de treinos ---------- */
-.ficha-tabs { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
-.ficha-tabs button { padding: 12px 0; border-radius: 14px; background: var(--card); border: 1px solid var(--line); font-family: var(--display); font-size: 18px; letter-spacing: .04em; color: var(--muted); transition: all .15s; }
+.ficha-tabs { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 5px; }
+.ficha-tabs button { padding: 12px 0; border-radius: 14px; background: var(--card); border: 1px solid var(--line); font-family: var(--display); font-size: clamp(13px, 3.8vw, 18px); letter-spacing: .02em; color: var(--muted); transition: all .15s; }
 .ficha-tabs button.sel { color: #0a0d0b; background: var(--lime); border-color: var(--lime); box-shadow: 0 8px 22px rgba(198,255,61,.18); }
 .ficha-tabs button.hoje::after { content: " •"; color: var(--orange); }
 .ficha-tabs button.sel.hoje::after { color: #0a0d0b; }

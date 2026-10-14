@@ -9,7 +9,7 @@ const TREINOS = [
   { t: "Treino B", s: "Dorsais, posterior e bíceps", c: "B" },
   { t: "Cardio Zona 2", s: "1000 degraus ou 45 min em zona 2", c: "Cardio" },
   { t: "Treino C", s: "Pernas completo · leg press e extensora", c: "C" },
-  { t: "Treino B", s: "Dorsais, posterior e bíceps", c: "B" },
+  { t: "Treino D", s: "Empurrar leve: peito, ombros e tríceps", c: "D" },
   { t: "Cardio Ativo", s: "Regenerativo + core isométrico", c: "Ativo" },
 ];
 const META_CORTE = 80;
