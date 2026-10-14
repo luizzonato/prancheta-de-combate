@@ -41,9 +41,7 @@
       <div class="top-actions">
         <button class="icon-btn" id="btnTema" type="button" aria-label="Alternar tema claro ou escuro" title="Tema claro/escuro">☀</button>
         <button class="icon-btn txt" id="btnPdf" aria-label="Exportar página em PDF" title="Exportar página em PDF">PDF</button>
-        <button class="icon-btn" id="btnExport" aria-label="Exportar CSV" title="Exportar CSV">⇩</button>
-        <button class="icon-btn danger" id="btnReset" aria-label="Zerar semana" title="Zerar semana">↺</button>
-      </div>
+</div>
     </header>
 
     <!-- ========== ABA HOJE ========== -->
@@ -196,6 +194,13 @@
           <input id="fileImport" type="file" accept="application/json,.json" hidden />
         </div>
         <p class="muted small bk-last" id="bkLast"></p>
+      </section>
+      <section class="card">
+        <div class="card-head"><h3>DADOS DA SEMANA</h3></div>
+        <div class="bk-actions">
+          <button class="btn" id="btnExport" type="button">⇩ EXPORTAR CSV</button>
+          <button class="btn danger" id="btnReset" type="button">↺ ZERAR SEMANA</button>
+        </div>
       </section>
       <section class="card">
         <div class="card-head"><h3>RELATÓRIO EM PDF</h3><span class="muted small">pronto para enviar</span></div>
