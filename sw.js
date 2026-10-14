@@ -1,4 +1,4 @@
-const CACHE = "prancheta-v13";
+const CACHE = "prancheta-v14";
 const ARQUIVOS = [
   "./", "index.html", "style.css", "app.js", "treinos.js", "avatar.js", "relatorio.js", "vendor/jspdf.umd.min.js", "manifest.webmanifest",
   "icons/icon.svg", "icons/icon-192.png", "icons/icon-512.png", "icons/icon-maskable-512.png",

@@ -90,14 +90,14 @@ async function gerarRelatorioPdf(opcoes) {
   });
 
   /* ---------- LZ + medidas ---------- */
-  caixa(M, 69, 82, 124);
-  doc.addImage(avatarPng, "PNG", M + 10, 72, 62, 103);
+  caixa(M, 69, 82, 112);
+  doc.addImage(avatarPng, "PNG", M + 14, 72, 54, 90);
   const hm = HUMORES[humorKey] || HUMORES.normal;
-  fonte("bold", 7, COR.mut); txt("HUMOR DE HOJE", M + 41, 181, { align: "center" });
-  fonte("bold", 12, COR.lime); txt(hm.rot, M + 41, 188, { align: "center" });
+  fonte("bold", 7, COR.mut); txt("HUMOR DE HOJE", M + 41, 169, { align: "center" });
+  fonte("bold", 12, COR.lime); txt(hm.rot, M + 41, 176, { align: "center" });
 
   const rx = M + 88, rw = W - M - rx;
-  caixa(rx, 69, rw, 124);
+  caixa(rx, 69, rw, 112);
   fonte("bold", 9, COR.lime); txt("MEDIDAS", rx + 5, 77);
   fonte("bold", 7, COR.mut);
   txt("ATUAL", rx + rw - 32, 77, { align: "right" }); txt("VARIAÇÃO", rx + rw - 5, 77, { align: "right" });
@@ -110,11 +110,11 @@ async function gerarRelatorioPdf(opcoes) {
     const bom = k === "cintura" || k === "peso" ? dif < 0 : dif > 0;
     fonte("bold", 9, dif === 0 ? COR.mut : bom ? COR.lime : COR.org);
     txt((dif > 0 ? "+" : "") + virgula(dif) + (k === "peso" ? " kg" : " cm"), rx + rw - 5, my, { align: "right" });
-    my += 7.2;
+    my += 6.6;
   });
 
   // meta de cintura
-  const gy = 148;
+  const gy = 144;
   stroke(COR.line); doc.line(rx + 5, gy - 6, rx + rw - 5, gy - 6);
   fonte("bold", 8, COR.pur); txt("META DE CINTURA · " + virgula(d.metaCintura) + " cm", rx + 5, gy);
   fonte("bold", 8, COR.txt); txt(Math.round(ins.progresso * 100) + "%", rx + rw - 5, gy, { align: "right" });
@@ -123,15 +123,15 @@ async function gerarRelatorioPdf(opcoes) {
   fonte("normal", 8, COR.mut);
   txt(ins.falta > 0 ? "Faltam " + virgula(ins.falta) + " cm para a meta" : "Meta atingida", rx + 5, gy + 13);
   fonte("bold", 8, COR.amb);
-  doc.splitTextToSize(limparTexto(ins.previsao), rw - 10).slice(0, 4).forEach((l, i) => doc.text(l, rx + 5, gy + 19 + i * 4.4));
+  doc.splitTextToSize(limparTexto(ins.previsao), rw - 10).slice(0, 3).forEach((l, i) => doc.text(l, rx + 5, gy + 19 + i * 4.4));
   fonte("normal", 7, COR.mut);
-  txt("Estágio: " + ins.estagio + " · base em 12/10/2026", rx + 5, 189);
+  txt("Estágio: " + ins.estagio + " · base em 12/10/2026", rx + 5, 178);
 
   /* ---------- gráfico da semana ---------- */
-  caixa(M, 198, W - 2 * M, 50);
-  fonte("bold", 9, COR.lime); txt("CONSISTÊNCIA DA SEMANA", M + 5, 206);
-  fonte("normal", 7, COR.amb); txt("linha tracejada = corte de 80%", W - M - 5, 206, { align: "right" });
-  const px = M + 12, pw = W - 2 * M - 20, py = 212, ph = 25;
+  caixa(M, 186, W - 2 * M, 44);
+  fonte("bold", 9, COR.lime); txt("CONSISTÊNCIA DA SEMANA", M + 5, 194);
+  fonte("normal", 7, COR.amb); txt("linha tracejada = corte de 80%", W - M - 5, 194, { align: "right" });
+  const px = M + 12, pw = W - 2 * M - 20, py = 199, ph = 23;
   const bw = pw / 7;
   fonte("normal", 6.5, COR.mut);
   [0, 50, 100].forEach((v) => { txt(String(v), px - 3, py + ph - (ph * v) / 100 + 1, { align: "right" }); });
@@ -148,7 +148,7 @@ async function gerarRelatorioPdf(opcoes) {
   doc.setLineDashPattern([], 0);
 
   /* ---------- hábitos da semana ---------- */
-  y = 254;
+  y = 236;
   const cabHabitos = () => {
     fonte("bold", 9, COR.lime); txt("HÁBITOS DA SEMANA", M, y);
     fonte("bold", 6.5, COR.mut);
@@ -187,12 +187,13 @@ async function gerarRelatorioPdf(opcoes) {
     fonte("bold", 10, COR.lime); txt(f.titulo, M + 4, y + 6.6);
     fonte("normal", 7, COR.amb); txt("Cardio: " + f.cardio, W - M - 4, y + 6.4, { align: "right" });
     y += 13;
+    const continua = () => { y = novaPagina(); fonte("bold", 7, COR.mut); txt(f.titulo.toUpperCase() + " · CONTINUAÇÃO", M + 2, y + 1); y += 6; };
     f.fases.forEach((fase) => {
-      if (y + 14 > H - 14) y = novaPagina();
+      if (y + 14 > H - 14) continua();
       fonte("bold", 7, COR.mut); txt(fase.nome.toUpperCase() + (fase.descanso ? "  ·  descanso " + fase.descanso : ""), M + 2, y + 3);
       y += 5.5;
       fase.itens.forEach((it, idx) => {
-        if (y + 7 > H - 14) y = novaPagina();
+        if (y + 7 > H - 14) continua();
         if (idx % 2 === 0) { fill(COR.card2); doc.rect(M, y - 0.6, W - 2 * M, 6.4, "F"); }
         const feito = !!d.feitos[it.id];
         if (feito) { fill(COR.lime); doc.roundedRect(M + 2, y + 0.6, 3.6, 3.6, 0.7, 0.7, "F"); }
