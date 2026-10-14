@@ -14,13 +14,22 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <defs><linearGradient id="lzg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e4ff7a"/><stop offset="1" stop-color="#b6f02a"/></linearGradient></defs>
+    <symbol id="lz-logo" viewBox="0 0 120 120"><path d="M60 6 L108 24 V70 Q108 100 60 116 Q12 100 12 70 V24 Z" fill="#0f160f" stroke="url(#lzg)" stroke-width="3.5" stroke-linejoin="round"/><g transform="translate(13 0) skewX(-12)" fill="url(#lzg)"><polygon points="22,28 40,28 40,76 58,76 58,90 22,90"/><polygon points="64,28 102,28 102,41 84,77 102,77 102,90 62,90 62,77 80,41 64,41"/></g><g fill="#ff5a1f"><rect x="39" y="95.5" width="42" height="3" rx="1.5"/><rect x="34" y="92" width="5" height="10" rx="1.6"/><rect x="81" y="92" width="5" height="10" rx="1.6"/></g></symbol>
+  </svg>
   <div id="app">
+    <p class="print-only print-head">LZ · Prancheta de Combate <span id="printDate"></span> <span id="printView"></span></p>
     <header class="top">
-      <div>
-        <p class="eyebrow"><span class="pulse"></span>PROTOCOLO CUTTING ATIVO</p>
-        <h1>PRANCHETA<br /><em>DE COMBATE</em></h1>
+      <div class="brand">
+        <svg class="logo" viewBox="0 0 120 120" role="img" aria-label="LZ"><use href="#lz-logo"/></svg>
+        <div>
+          <p class="eyebrow"><span class="pulse"></span>PROTOCOLO CUTTING ATIVO</p>
+          <h1>PRANCHETA<br /><em>DE COMBATE</em></h1>
+        </div>
       </div>
       <div class="top-actions">
+        <button class="icon-btn txt" id="btnPdf" aria-label="Exportar página em PDF" title="Exportar página em PDF">PDF</button>
         <button class="icon-btn" id="btnExport" aria-label="Exportar CSV" title="Exportar CSV">⇩</button>
         <button class="icon-btn danger" id="btnReset" aria-label="Zerar semana" title="Zerar semana">↺</button>
       </div>
@@ -111,21 +120,39 @@
     <div id="viewAvatar" class="view" hidden>
       <section class="card">
         <div class="card-head">
-          <h3>MEU BONECO</h3>
+          <h3>LZ</h3>
           <span class="chip" id="avStage">—</span>
         </div>
         <div class="av-stage"><div id="avSvg" class="av-svg"></div></div>
-        <p class="muted small av-legend"><i class="dash"></i>linha tracejada = você em 12/10 (início). O boneco é a sua versão de hoje.</p>
-        <div class="av-toggles">
+        <p class="muted small av-legend"><i class="dash"></i>linha tracejada = você em 12/10 (início). O LZ é a sua versão de hoje.</p>
+        <div class="av-toggles no-print">
           <label class="sw"><input type="checkbox" id="avShirt" /><span>Sem camiseta</span></label>
           <label class="sw"><input type="checkbox" id="avAmp" /><span>Ampliar mudanças (2×)</span></label>
         </div>
-        <div class="av-skin" id="avSkin" role="radiogroup" aria-label="Tom de pele"></div>
-        <div class="av-sim">
+        <div class="av-sim no-print">
           <label for="avSim">PRÉVIA: <b id="avSimVal">—</b> de cintura</label>
           <input type="range" id="avSim" min="70" max="120" step="0.5" />
           <button type="button" class="link-btn" id="avSimReset">voltar para a medida real</button>
         </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head"><h3>HUMOR DO DIA</h3><span class="muted small" id="humorHint">—</span></div>
+        <div class="humor-days" id="humorDays" role="group" aria-label="Dias"></div>
+        <div class="humor-pick no-print" id="humorPick" role="radiogroup" aria-label="Humor"></div>
+        <div class="bk-actions no-print">
+          <button class="btn lime" id="humorSave" type="button">SALVAR HUMOR</button>
+          <button class="btn" id="humorClear" type="button">LIMPAR DIA</button>
+        </div>
+      </section>
+
+      <section class="card no-print">
+        <div class="card-head"><h3>APARÊNCIA</h3><span class="muted small">monte o seu LZ</span></div>
+        <div class="av-toggles" id="avParts"></div>
+        <div class="swrow"><span>Pele</span><div class="swatches" id="swPele"></div></div>
+        <div class="swrow"><span>Cabelo</span><div class="swatches" id="swCabelo"></div></div>
+        <div class="swrow"><span>Camiseta</span><div class="swatches" id="swCamisa"></div></div>
+        <div class="swrow"><span>Gorro</span><div class="swatches" id="swGorro"></div></div>
       </section>
 
       <section class="card">
@@ -137,10 +164,10 @@
           <p class="forecast" id="avForecast"></p>
         </div>
         <div id="avDeltas" class="deltas"></div>
-        <p class="muted small av-note">O boneco é ilustrativo. Gominhos aparecem quando o percentual de gordura cai, e a cintura é só um sinal disso. Cinta, balança e espelho juntos contam a história completa.</p>
+        <p class="muted small av-note">O LZ é ilustrativo. Gominhos aparecem quando o percentual de gordura cai, e a cintura é só um sinal disso. Cinta, balança e espelho juntos contam a história completa.</p>
       </section>
 
-      <section class="card">
+      <section class="card no-print">
         <div class="card-head"><h3>ATUALIZAR MEDIDAS</h3><span class="muted small">a cada 15 dias</span></div>
         <form id="avForm" class="mgrid"></form>
         <div class="bk-actions"><button class="btn lime" id="avSave" type="button">SALVAR MEDIDAS</button></div>
@@ -158,6 +185,11 @@
           <input id="fileImport" type="file" accept="application/json,.json" hidden />
         </div>
         <p class="muted small bk-last" id="bkLast"></p>
+      </section>
+      <section class="card">
+        <div class="card-head"><h3>EXPORTAR EM PDF</h3></div>
+        <p class="muted small bk-text">Gera um PDF da aba que você está vendo (Hoje, Treinos ou LZ). Na janela que abrir, escolha “Salvar como PDF” como destino.</p>
+        <div class="bk-actions"><button class="btn purple" id="btnPdf2" type="button">EXPORTAR PÁGINA EM PDF</button></div>
       </section>
       <section class="card">
         <div class="card-head"><h3>COPIAR E COLAR</h3><span class="muted small">sem arquivo</span></div>
@@ -178,7 +210,7 @@
   <nav class="tabbar" id="tabbar" aria-label="Seções">
     <button data-tab="Hoje" class="on" type="button"><i>◉</i><span>HOJE</span></button>
     <button data-tab="Treinos" type="button"><i>▤</i><span>TREINOS</span></button>
-    <button data-tab="Avatar" type="button"><i>☻</i><span>BONECO</span></button>
+    <button data-tab="Avatar" type="button"><i><svg class="tabicon" viewBox="0 0 120 120" aria-hidden="true"><use href="#lz-logo"/></svg></i><span>LZ</span></button>
     <button data-tab="Backup" type="button"><i>⇅</i><span>BACKUP</span></button>
   </nav>
 

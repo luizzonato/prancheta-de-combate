@@ -1,6 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs><linearGradient id="lzg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e4ff7a"/><stop offset="1" stop-color="#b6f02a"/></linearGradient></defs>
   <rect width="512" height="512" rx="112" fill="#0a0d0b"/>
-  <circle cx="256" cy="256" r="170" fill="none" stroke="#243026" stroke-width="34"/>
-  <circle cx="256" cy="256" r="170" fill="none" stroke="#c6ff3d" stroke-width="34" stroke-linecap="round" stroke-dasharray="800 1068" transform="rotate(-90 256 256)"/>
-  <path d="M196 262l44 44 84-96" fill="none" stroke="#c6ff3d" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/>
+  <g transform="translate(76 76) scale(3)"><path d="M60 6 L108 24 V70 Q108 100 60 116 Q12 100 12 70 V24 Z" fill="#0f160f" stroke="url(#lzg)" stroke-width="3.5" stroke-linejoin="round"/><g transform="translate(13 0) skewX(-12)" fill="url(#lzg)"><polygon points="22,28 40,28 40,76 58,76 58,90 22,90"/><polygon points="64,28 102,28 102,41 84,77 102,77 102,90 62,90 62,77 80,41 64,41"/></g><g fill="#ff5a1f"><rect x="39" y="95.5" width="42" height="3" rx="1.5"/><rect x="34" y="92" width="5" height="10" rx="1.6"/><rect x="81" y="92" width="5" height="10" rx="1.6"/></g></g>
 </svg>

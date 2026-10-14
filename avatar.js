@@ -2,6 +2,28 @@
 
 // Boneco que muda de proporção conforme as medidas. Funções puras: recebem dados e devolvem SVG/números.
 const PELES = ["#f1c9a5", "#d9a577", "#b97d52", "#8d5a3b", "#5e3b26"];
+const CABELOS = ["#1c1714", "#4a3322", "#c9a35b", "#9aa0a6"];
+const CAMISAS = [
+  { nome: "Branca", fill: "#f4f2ec", stroke: "#d8d4c8", print: "#2a2724" },
+  { nome: "Preta", fill: "#24282a", stroke: "#3d4346", print: "#e8e8e8" },
+  { nome: "Verde-limão", fill: "#b8f032", stroke: "#8fc21f", print: "#10150a" },
+  { nome: "Cinza", fill: "#6b7480", stroke: "#535b66", print: "#f2f2f2" },
+];
+const GORROS = [
+  { nome: "Creme", fill: "#efe6d4", stroke: "#d6cbb4", band: "#e6dcc7", patch: "#26292a" },
+  { nome: "Preto", fill: "#2b2e30", stroke: "#1a1c1d", band: "#232628", patch: "#d9d9d9" },
+  { nome: "Cinza", fill: "#8a919a", stroke: "#6f7680", band: "#7c848d", patch: "#1f2224" },
+  { nome: "Verde", fill: "#2f6b3a", stroke: "#235230", band: "#295e33", patch: "#e8f5d8" },
+];
+// humores: rótulo, emoji e a cor do brilho atrás do boneco
+const HUMORES = {
+  foco: { rot: "Focado", emoji: "😤", cor: "rgba(80,160,255,.22)" },
+  feliz: { rot: "Feliz", emoji: "😄", cor: "rgba(255,200,40,.22)" },
+  motivado: { rot: "Motivado", emoji: "🔥", cor: "rgba(255,90,31,.26)" },
+  normal: { rot: "Normal", emoji: "😐", cor: "rgba(198,255,61,.12)" },
+  cansado: { rot: "Cansado", emoji: "😴", cor: "rgba(180,140,255,.22)" },
+  bravo: { rot: "Bravo", emoji: "😠", cor: "rgba(255,60,60,.24)" },
+};
 const CAMPOS_MEDIDA = [
   ["cintura", "Cintura", "cm"], ["peso", "Peso", "kg"], ["peito", "Peito", "cm"], ["quadril", "Quadril", "cm"],
   ["ombro", "Ombro", "cm"], ["biceps", "Bíceps", "cm"], ["braco", "Braço inteiro", "cm"], ["coxa", "Coxa", "cm"],
@@ -37,14 +59,56 @@ function caminhoTorso(cx, P, extra, yBase) {
     f1(R[0][0]) + " 136 " + f1(R[0][0]) + " 150" + curva(R) + "L" + f1(L[0][0]) + " " + yBase + curva(L) + "Z";
 }
 
+function rosto(h, cx, barba) {
+  const ink = "#241b16";
+  const boca = barba ? "#f4e6d3" : "#5a2f26";
+  const L = (x) => cx - x, R = (x) => cx + x;
+  const ell = (x, ry, extra) => '<ellipse cx="' + x + '" cy="91" rx="2.7" ry="' + ry + '" fill="' + ink + '"/>' + (extra || "");
+  const st = (d, w, c) => '<path d="' + d + '" stroke="' + (c || ink) + '" stroke-width="' + w + '" fill="none" stroke-linecap="round" stroke-linejoin="round"/>';
+  let o = "";
+  const nariz = st("M" + cx + " 94 q-3 8 0 9", 1.6, "#00000033");
+  if (h === "feliz") {
+    o += st("M" + L(16) + " 92 q4 -6 8 0 M" + R(8) + " 92 q4 -6 8 0", 2.6);
+    o += st("M" + L(19) + " 82 q7 -5 14 -1 M" + R(5) + " 81 q7 -4 14 1", 2.4);
+    o += '<path d="M' + L(9) + " 110 Q" + cx + " 123 " + R(9) + ' 110Z" fill="#fff"/>' + st("M" + L(9) + " 110 Q" + cx + " 123 " + R(9) + " 110", 1.4, boca);
+  } else if (h === "foco") {
+    o += ell(L(12), 2.4) + ell(R(12), 2.4);
+    o += st("M" + L(20) + " 82 L" + L(5) + " 86 M" + R(5) + " 86 L" + R(20) + " 82", 2.8);
+    o += st("M" + L(5) + " 113 h10", 2.4, boca);
+  } else if (h === "motivado") {
+    o += ell(L(12), 3.4, '<circle cx="' + (L(12) + 1) + '" cy="89.6" r="1.1" fill="#fff"/>') + ell(R(12), 3.4, '<circle cx="' + (R(12) + 1) + '" cy="89.6" r="1.1" fill="#fff"/>');
+    o += st("M" + L(20) + " 83 q7 -6 15 -4 M" + R(5) + " 79 q8 -2 15 4", 2.6);
+    o += st("M" + L(7) + " 112 Q" + (cx + 2) + " 118 " + R(10) + " 108", 2.6, boca);
+  } else if (h === "cansado") {
+    o += st("M" + L(16) + " 91 q4 4 8 0 M" + R(8) + " 91 q4 4 8 0", 2.4);
+    o += st("M" + L(17) + " 97 q5 3 10 0 M" + R(7) + " 97 q5 3 10 0", 2, "#7a5a73");
+    o += st("M" + L(20) + " 86 L" + L(5) + " 83 M" + R(5) + " 83 L" + R(20) + " 86", 2.4);
+    o += st("M" + L(5) + " 114 q5 -3 10 0", 2.2, boca);
+  } else if (h === "bravo") {
+    o += ell(L(12), 1.9) + ell(R(12), 1.9);
+    o += st("M" + L(21) + " 79 L" + L(4) + " 88 M" + R(4) + " 88 L" + R(21) + " 79", 3);
+    o += st("M" + L(8) + " 117 Q" + cx + " 109 " + R(8) + " 117", 2.4, boca);
+  } else { // normal
+    o += ell(L(12), 3) + ell(R(12), 3);
+    o += st("M" + L(19) + " 83 q7 -2 14 0 M" + R(5) + " 83 q7 -2 14 0", 2.4);
+    o += st("M" + L(6) + " 113 h12", 2.4, boca);
+  }
+  return nariz + o;
+}
+
 function desenharAvatar(m, base, o) {
   const cx = 150;
   const P = proporcoes(m, base, o.ampliar ? 2 : 1);
   const G = proporcoes(base, base, 1);
   const pele = PELES[clamp(o.pele | 0, 0, PELES.length - 1)];
   const peleSombra = "#00000022";
+  const camisa = CAMISAS[clamp(o.camisa | 0, 0, CAMISAS.length - 1)];
+  const gorro = GORROS[clamp(o.gorroCor | 0, 0, GORROS.length - 1)];
+  const cabelo = CABELOS[clamp(o.cabelo | 0, 0, CABELOS.length - 1)];
+  const mostrarGorro = o.gorro !== false, mostrarFone = o.fone !== false, mostrarBarba = o.barba !== false;
+  const mostrarTatu = o.tatuagem !== false, mostrarRelogio = o.relogio !== false;
   const prog = clamp(o.progresso, 0, 1);
-  let s = '<svg viewBox="0 0 300 500" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Boneco com as suas proporções atuais">';
+  let s = '<svg viewBox="0 0 300 500" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="LZ com as suas proporções atuais">';
 
   // contorno da linha de base (12/10) para comparar
   const lado = (Q, sinal) => {
@@ -73,10 +137,14 @@ function desenharAvatar(m, base, o) {
     s += '<circle cx="' + f1(xa) + '" cy="296" r="' + f1(fw * 0.58) + '" fill="' + pele + '"/>';
     s += '<rect x="' + f1(xa - P.arm / 2) + '" y="142" width="' + f1(P.arm) + '" height="82" rx="' + f1(P.arm / 2) + '" fill="' + pele + '"/>';
     if (sg === -1) {
-      s += '<g><rect x="' + f1(xa - fw / 2) + '" y="236" width="' + f1(fw) + '" height="13" fill="#1b1b1b" opacity=".88"/>' +
-        '<path d="M' + f1(xa - fw / 2 + 2) + " 242.5 h" + f1(fw - 4) + '" stroke="' + pele + '" stroke-width="1.5" stroke-dasharray="3 3" opacity=".7"/>' +
-        '<rect x="' + f1(xa - fw / 2 - 1) + '" y="268" width="' + f1(fw + 2) + '" height="14" rx="4" fill="#202322"/>' +
-        '<rect x="' + f1(xa - 4) + '" y="271" width="8" height="8" rx="2" fill="#54605a"/></g>';
+      if (mostrarTatu) {
+        s += '<g><rect x="' + f1(xa - fw / 2) + '" y="236" width="' + f1(fw) + '" height="13" fill="#1b1b1b" opacity=".88"/>' +
+          '<path d="M' + f1(xa - fw / 2 + 2) + " 242.5 h" + f1(fw - 4) + '" stroke="' + pele + '" stroke-width="1.5" stroke-dasharray="3 3" opacity=".7"/></g>';
+      }
+      if (mostrarRelogio) {
+        s += '<g><rect x="' + f1(xa - fw / 2 - 1) + '" y="268" width="' + f1(fw + 2) + '" height="14" rx="4" fill="#202322"/>' +
+          '<rect x="' + f1(xa - 4) + '" y="271" width="8" height="8" rx="2" fill="#54605a"/></g>';
+      }
     }
   });
 
@@ -95,32 +163,40 @@ function desenharAvatar(m, base, o) {
     s += '<ellipse cx="' + cx + '" cy="262" rx="' + f1(P.wa * 0.92) + '" ry="34" fill="#000" opacity="' + f1((1 - prog) * 0.16) + '"/>';
     s += '<circle cx="' + cx + '" cy="286" r="2.2" fill="#00000066"/>';
   } else {
-    s += '<path d="' + caminhoTorso(cx, P, 5, 318) + '" fill="#f4f2ec" stroke="#d8d4c8" stroke-width="1.5"/>';
+    s += '<path d="' + caminhoTorso(cx, P, 5, 318) + '" fill="' + camisa.fill + '" stroke="' + camisa.stroke + '" stroke-width="1.5"/>';
     [-1, 1].forEach((sg) => {
       const xa = cx + sg * (P.sh + P.arm / 2 - 6);
-      s += '<rect x="' + f1(xa - P.arm / 2 - 4) + '" y="138" width="' + f1(P.arm + 8) + '" height="54" rx="' + f1((P.arm + 8) / 2.4) + '" fill="#f4f2ec" stroke="#d8d4c8" stroke-width="1.5"/>';
+      s += '<rect x="' + f1(xa - P.arm / 2 - 4) + '" y="138" width="' + f1(P.arm + 8) + '" height="54" rx="' + f1((P.arm + 8) / 2.4) + '" fill="' + camisa.fill + '" stroke="' + camisa.stroke + '" stroke-width="1.5"/>';
     });
     // estampa de carinha no peito (lado esquerdo da tela)
     const ex = cx - P.ch * 0.46;
-    s += '<g stroke="#2a2724" stroke-width="1.6" fill="none" stroke-linecap="round"><circle cx="' + f1(ex) + '" cy="188" r="11"/>' +
+    s += '<g stroke="' + camisa.print + '" stroke-width="1.6" fill="none" stroke-linecap="round"><circle cx="' + f1(ex) + '" cy="188" r="11"/>' +
       '<path d="M' + f1(ex - 6) + " 183 l3 3 m0 -3 l-3 3 M" + f1(ex + 3) + " 183 l3 3 m0 -3 l-3 3 M" + f1(ex - 5) + " 194 h10" + '"/>' +
       '<path d="M' + f1(ex - 4) + " 200 v8 M" + f1(ex + 2) + " 200 v6" + '"/></g>';
   }
 
   // cabeça
+  const hm = HUMORES[o.humor] ? o.humor : "normal";
   s += '<rect x="' + (cx - 13) + '" y="118" width="26" height="26" fill="' + pele + '"/><rect x="' + (cx - 13) + '" y="118" width="26" height="26" fill="' + peleSombra + '"/>';
   s += '<circle cx="' + cx + '" cy="92" r="34" fill="' + pele + '"/>';
-  s += '<path d="M' + (cx - 16) + " 104 Q" + cx + " 100 " + (cx + 16) + " 104 L" + (cx + 13) + " 122 Q" + cx + " 136 " + (cx - 13) + ' 122Z" fill="#2a211c"/>';
-  s += '<path d="M' + (cx - 11) + " 107 Q" + cx + " 112 " + (cx + 11) + ' 107" stroke="' + pele + '" stroke-width="3.2" fill="none" stroke-linecap="round"/>';
-  s += '<g stroke="#2a211c" stroke-linecap="round" fill="none"><path d="M' + (cx - 19) + " 90 q7 4 14 0 M" + (cx + 5) + " 90 q7 4 14 0" + '" stroke-width="2.4"/>' +
-    '<path d="M' + (cx - 20) + " 84 q8 -4 15 -1 M" + (cx + 5) + " 83 q7 -3 15 1" + '" stroke-width="2.2"/></g>';
-  // gorro + fone
-  s += '<path d="M' + (cx - 37) + " 84 Q" + (cx - 40) + " 44 " + cx + " 42 Q" + (cx + 40) + " 44 " + (cx + 37) + ' 84Z" fill="#efe6d4" stroke="#d6cbb4" stroke-width="1.5"/>';
-  s += '<rect x="' + (cx - 38) + '" y="70" width="76" height="16" rx="6" fill="#e6dcc7" stroke="#d6cbb4" stroke-width="1.5"/>';
-  s += '<rect x="' + (cx - 13) + '" y="73" width="26" height="10" rx="2" fill="#26292a"/><rect x="' + (cx - 9) + '" y="76" width="18" height="2.4" fill="#e8e8e8" opacity=".8"/>';
-  s += '<path d="M' + (cx - 43) + " 92 C" + (cx - 46) + " 26 " + (cx + 46) + " 26 " + (cx + 43) + ' 92" fill="none" stroke="#f6f3ea" stroke-width="6" stroke-linecap="round"/>';
-  s += '<path d="M' + (cx - 43) + " 92 C" + (cx - 46) + " 26 " + (cx + 46) + " 26 " + (cx + 43) + ' 92" fill="none" stroke="#cfc9b8" stroke-width="1" opacity=".7"/>';
-  [-1, 1].forEach((sg) => { s += '<ellipse cx="' + (cx + sg * 43) + '" cy="98" rx="9" ry="17" fill="#f6f3ea" stroke="#cfc9b8" stroke-width="1.5"/>'; });
+  if (!mostrarGorro) {
+    s += '<path d="M' + (cx - 34) + " 90 Q" + (cx - 40) + " 50 " + cx + " 48 Q" + (cx + 40) + " 50 " + (cx + 34) + " 90 Q" + (cx + 30) + " 70 " + cx + " 67 Q" + (cx - 30) + " 70 " + (cx - 34) + ' 90Z" fill="' + cabelo + '"/>';
+  }
+  if (mostrarBarba) {
+    s += '<path d="M' + (cx - 17) + " 103 Q" + cx + " 99 " + (cx + 17) + " 103 L" + (cx + 14) + " 123 Q" + cx + " 137 " + (cx - 14) + ' 123Z" fill="' + (mostrarGorro ? "#2a211c" : cabelo) + '"/>';
+  }
+  s += rosto(hm, cx, mostrarBarba);
+  if (mostrarGorro) {
+    s += '<path d="M' + (cx - 37) + " 78 Q" + (cx - 40) + " 38 " + cx + " 36 Q" + (cx + 40) + " 38 " + (cx + 37) + ' 78Z" fill="' + gorro.fill + '" stroke="' + gorro.stroke + '" stroke-width="1.5"/>';
+    s += '<rect x="' + (cx - 38) + '" y="64" width="76" height="15" rx="6" fill="' + gorro.band + '" stroke="' + gorro.stroke + '" stroke-width="1.5"/>';
+    s += '<rect x="' + (cx - 13) + '" y="67" width="26" height="9" rx="2" fill="' + gorro.patch + '"/><rect x="' + (cx - 9) + '" y="70" width="18" height="2.4" fill="' + gorro.fill + '" opacity=".8"/>';
+  }
+  if (mostrarFone) {
+    const topo = mostrarGorro ? 20 : 28;
+    s += '<path d="M' + (cx - 43) + " 92 C" + (cx - 46) + " " + topo + " " + (cx + 46) + " " + topo + " " + (cx + 43) + ' 92" fill="none" stroke="#f6f3ea" stroke-width="6" stroke-linecap="round"/>';
+    s += '<path d="M' + (cx - 43) + " 92 C" + (cx - 46) + " " + topo + " " + (cx + 46) + " " + topo + " " + (cx + 43) + ' 92" fill="none" stroke="#cfc9b8" stroke-width="1" opacity=".7"/>';
+    [-1, 1].forEach((sg) => { s += '<ellipse cx="' + (cx + sg * 43) + '" cy="98" rx="9" ry="17" fill="#f6f3ea" stroke="#cfc9b8" stroke-width="1.5"/>'; });
+  }
   return s + "</svg>";
 }
 

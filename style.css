@@ -230,7 +230,7 @@ h1 em { font-style: normal; color: var(--lime); }
 
 /* ---------- boneco ---------- */
 .av-stage { display: grid; place-items: center; padding: 8px 0 0; border-radius: 18px;
-  background: radial-gradient(260px 200px at 50% 38%, rgba(198,255,61,.10), transparent 70%), var(--bg2); border: 1px solid var(--line); }
+  background: radial-gradient(260px 200px at 50% 38%, var(--glow, rgba(198,255,61,.10)), transparent 70%), var(--bg2); border: 1px solid var(--line); transition: background .4s; }
 .av-svg { width: min(100%, 300px); }
 .av-svg svg { width: 100%; height: auto; display: block; }
 .av-svg svg g, .av-svg svg path, .av-svg svg rect { transition: d .5s, x .5s, width .5s, fill .3s; }
@@ -264,3 +264,82 @@ h1 em { font-style: normal; color: var(--lime); }
 .mgrid label { display: grid; gap: 4px; font-size: 10px; letter-spacing: .08em; color: var(--muted); font-weight: 800; text-transform: uppercase; }
 .mgrid input { padding: 11px 12px; border-radius: 12px; background: var(--bg2); border: 1px solid var(--line); outline: none; font-family: var(--display); font-size: 18px; }
 .mgrid input:focus { border-color: var(--purple); }
+
+/* ---------- logo LZ, humor, aparência ---------- */
+.brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.logo { width: 62px; height: 62px; flex: none; filter: drop-shadow(0 6px 16px rgba(198,255,61,.25)); }
+.icon-btn.txt { font-size: 11px; font-weight: 900; letter-spacing: .06em; }
+.tabbar button i .tabicon { width: 26px; height: 26px; display: block; }
+.tabbar button i { display: grid; place-items: center; height: 26px; }
+.tabbar button:not(.on) i .tabicon { filter: grayscale(1) brightness(.75); }
+
+.humor-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; }
+.hday { display: grid; justify-items: center; gap: 2px; padding: 8px 0; border-radius: 12px; background: var(--bg2); border: 1px solid var(--line); }
+.hday span { font-size: 10px; font-weight: 800; letter-spacing: .06em; color: var(--muted); }
+.hday i { font-style: normal; font-size: 18px; line-height: 1.3; }
+.hday.today span::after { content: " •"; color: var(--lime); }
+.hday.sel { border-color: var(--lime); background: linear-gradient(160deg, #1d2a14, var(--bg2)); }
+.humor-pick { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+.humor-pick button { display: grid; justify-items: center; gap: 2px; padding: 10px 0; border-radius: 14px; background: var(--bg2); border: 1px solid var(--line); transition: transform .12s, border-color .15s; }
+.humor-pick button i { font-style: normal; font-size: 26px; line-height: 1.2; }
+.humor-pick button span { font-size: 11px; font-weight: 800; letter-spacing: .05em; color: var(--muted); }
+.humor-pick button.sel { border-color: var(--lime); background: linear-gradient(160deg, #1d2a14, var(--bg2)); }
+.humor-pick button.sel span { color: var(--lime); }
+.humor-pick button:active { transform: scale(.94); }
+
+.swrow { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; }
+.swrow > span { font-size: 11px; letter-spacing: .1em; font-weight: 800; color: var(--muted); text-transform: uppercase; }
+.swatches { display: flex; gap: 10px; }
+.swatches button { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--line); padding: 0; }
+.swatches button.sel { border-color: var(--lime); box-shadow: 0 0 0 3px rgba(198,255,61,.25); }
+
+.print-only { display: none; }
+
+/* ---------- impressão / PDF ---------- */
+@page { margin: 12mm; }
+@media print {
+  :root { --bg: #fff; --bg2: #f3f4f1; --card: #fff; --line: #cfd3cb; --text: #14181a; --muted: #5b625c; --lime: #3f7d00; --lime-d: #5aa000; --amber: #a86400; --orange: #c43d00; --purple: #6a3fcf; }
+  html, body { background: #fff !important; color: #14181a; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; box-shadow: none !important; animation: none !important; transition: none !important; }
+  #app { max-width: none; padding: 0; gap: 10px; }
+  .tabbar, .toast, #fx, .top-actions, .no-print, .foot, .link-btn, .add, .measure-form, .limpar, .bk-actions, .matrix td.hn button, .day::after, #btnAbrirFicha { display: none !important; }
+  .print-only { display: block; font-size: 11px; color: #5b625c; margin: 0 0 4px; }
+  .print-head { font-weight: 700; letter-spacing: .04em; }
+  .top { padding-bottom: 6px; border-bottom: 2px solid #14181a; }
+  .logo { width: 44px; height: 44px; filter: none; }
+  h1 { font-size: 28px; color: #14181a; }
+  h1 em { color: #3f7d00; }
+  .card, .hero, .ex, .mission, .day, .m, .dl, .hday { break-inside: avoid; }
+  .card { border-color: #cfd3cb; background: #fff; }
+  .hero { background: #f3f4f1; }
+  .ring-fg { filter: none; }
+  .mission.done, .ex.done { background: #eef7dd; }
+  .av-stage { background: #f3f4f1 !important; }
+  .matrix-scroll { overflow: visible; }
+  .matrix { min-width: 0; }
+  .ficha-tabs button:not(.sel) { display: none; }
+  .ficha-tabs { grid-template-columns: 1fr; }
+  .ficha-tabs button.sel { color: #14181a; background: #e4ff7a; box-shadow: none; }
+  .carga input, .meta-in input { border: none; background: transparent; color: #14181a; }
+  .yt { display: none; }
+  .tag { color: #c43d00; }
+}
+
+/* ---------- ajuste de largura no celular (logo + 3 botões no topo) ---------- */
+#app { grid-template-columns: minmax(0, 1fr); }
+#app > *, .view > * { min-width: 0; }
+.top { gap: 8px; }
+.brand { flex: 1 1 auto; gap: 10px; }
+.brand > div { min-width: 0; }
+.logo { width: 50px; height: 50px; }
+h1 { font-size: clamp(26px, 7.6vw, 46px); }
+.eyebrow { font-size: 10px; letter-spacing: .12em; }
+.top-actions { flex: none; gap: 6px; }
+.icon-btn { width: 38px; height: 38px; font-size: 16px; }
+@media (max-width: 360px) { .eyebrow { display: none; } }
+.mgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.mgrid input, .add input, .measure-form input { width: 100%; min-width: 0; }
+@media print {
+  .day.sel, .hday.sel { background: #e8ffa0 !important; border-color: #3f7d00 !important; }
+  .day.sel .dn, .hday.sel span { color: #14181a !important; }
+}

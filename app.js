@@ -33,7 +33,8 @@ const PADRAO = () => ({
   ultimoBackup: null,
   medidasBase: { peso: 100, cintura: 108, peito: 114, quadril: 108, ombro: 54, biceps: 41.5, braco: 144, coxa: 66 },
   metaCintura: 90,
-  avatar: { pele: 2, semCamiseta: false, ampliar: true },
+  avatar: { pele: 2, semCamiseta: false, ampliar: true, gorro: true, fone: true, barba: true, tatuagem: true, relogio: true, cabelo: 0, camisa: 0, gorroCor: 0 },
+  humor: {},
 });
 
 /* ---------- datas ---------- */
@@ -62,6 +63,17 @@ let fichaSel = FICHA_DO_DIA[sel];
 let simCintura = null; // prévia do boneco, não é salva
 
 function ehObj(x) { return !!x && typeof x === "object" && !Array.isArray(x); }
+function normalizarAvatar(a) {
+  const b = ehObj(a) ? a : {};
+  const idx = (v, n, pad) => clampNum(num(v, pad) | 0, 0, n - 1);
+  return {
+    pele: idx(b.pele, PELES.length, 2), cabelo: idx(b.cabelo, CABELOS.length, 0),
+    camisa: idx(b.camisa, CAMISAS.length, 0), gorroCor: idx(b.gorroCor, GORROS.length, 0),
+    semCamiseta: !!b.semCamiseta, ampliar: b.ampliar !== false,
+    gorro: b.gorro !== false, fone: b.fone !== false, barba: b.barba !== false,
+    tatuagem: b.tatuagem !== false, relogio: b.relogio !== false,
+  };
+}
 function clampNum(v, a, b) { return Math.max(a, Math.min(b, v)); }
 function num(x, pad) { return typeof x === "number" && isFinite(x) ? x : pad; }
 
@@ -88,11 +100,8 @@ function normalizar(d) {
     ultimoBackup: typeof d.ultimoBackup === "string" ? d.ultimoBackup : null,
     medidasBase: {},
     metaCintura: clampNum(num(d.metaCintura, base.metaCintura), 50, 200),
-    avatar: {
-      pele: ehObj(d.avatar) ? clampNum(num(d.avatar.pele, 2) | 0, 0, PELES.length - 1) : 2,
-      semCamiseta: !!(ehObj(d.avatar) && d.avatar.semCamiseta),
-      ampliar: ehObj(d.avatar) ? d.avatar.ampliar !== false : true,
-    },
+    avatar: normalizarAvatar(d.avatar),
+    humor: {},
   };
   Object.keys(base.medidasBase).forEach((k) => { out.medidasBase[k] = num(ehObj(d.medidasBase) ? d.medidasBase[k] : undefined, base.medidasBase[k]); });
   if (ehObj(d.log)) Object.keys(d.log).forEach((k) => { if (/^\d{4}-\d{2}-\d{2}$/.test(k)) out.log[k] = Math.max(0, Math.min(100, num(d.log[k], 0))); });
@@ -109,6 +118,9 @@ function normalizar(d) {
   } else out.historico = base.historico;
   out.cargas = ehObj(d.cargas) ? {} : base.cargas;
   if (ehObj(d.cargas)) Object.keys(d.cargas).forEach((k) => { if (typeof d.cargas[k] === "string" || typeof d.cargas[k] === "number") out.cargas[k] = String(d.cargas[k]).slice(0, 12); });
+  if (ehObj(d.humor)) {
+    Object.keys(d.humor).sort().slice(-120).forEach((k) => { if (/^\d{4}-\d{2}-\d{2}$/.test(k) && HUMORES[d.humor[k]]) out.humor[k] = d.humor[k]; });
+  }
   if (ehObj(d.feitos)) Object.keys(d.feitos).forEach((k) => { if (d.feitos[k] === true) out.feitos[k] = true; });
   // virou a semana: marcações zeram, o log de % continua guardando a sequência
   const atual = chaveSemana(new Date());
@@ -235,7 +247,7 @@ function renderGrafico() {
   const y = (v) => padT + ph - (ph * v) / 100;
   let s = '<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Conclusão diária da semana">';
   [0, 25, 50, 75, 100].forEach((v) => {
-    s += '<line x1="' + padL + '" x2="' + (W - 6) + '" y1="' + y(v) + '" y2="' + y(v) + '" stroke="#243026" stroke-width="1"/>';
+    s += '<line x1="' + padL + '" x2="' + (W - 6) + '" y1="' + y(v) + '" y2="' + y(v) + '" style="stroke:var(--line)" stroke-width="1"/>';
     s += '<text x="' + (padL - 6) + '" y="' + (y(v) + 4) + '" text-anchor="end">' + v + "</text>";
   });
   for (let i = 0; i < 7; i++) {
@@ -244,8 +256,8 @@ function renderGrafico() {
     const w = bw * 0.64;
     const hh = Math.max(0, (ph * v) / 100);
     const cor = v >= META_CORTE ? "#c6ff3d" : "#4a6b2a";
-    s += '<rect class="bar-rect" x="' + x + '" y="' + (y(v)) + '" width="' + w + '" height="' + hh + '" rx="6" fill="' + cor + '"' + (i === sel ? ' stroke="#fff" stroke-width="1.5"' : "") + "/>";
-    if (v > 0) s += '<text x="' + (x + w / 2) + '" y="' + (y(v) - 5) + '" text-anchor="middle" style="fill:#f2f6f0;font-weight:700">' + v + "</text>";
+    s += '<rect class="bar-rect" x="' + x + '" y="' + (y(v)) + '" width="' + w + '" height="' + hh + '" rx="6" fill="' + cor + '"' + (i === sel ? ' style="stroke:var(--text)" stroke-width="1.5"' : "") + "/>";
+    if (v > 0) s += '<text x="' + (x + w / 2) + '" y="' + (y(v) - 5) + '" text-anchor="middle" style="fill:var(--text);font-weight:700">' + v + "</text>";
     s += '<text x="' + (x + w / 2) + '" y="' + (H - 8) + '" text-anchor="middle"' + (i === sel ? ' style="fill:#c6ff3d;font-weight:700"' : "") + ">" + DIAS_CURTOS[i] + "</text>";
   }
   s += '<line x1="' + padL + '" x2="' + (W - 6) + '" y1="' + y(META_CORTE) + '" y2="' + y(META_CORTE) + '" stroke="#ffb020" stroke-width="2" stroke-dasharray="6 6"/>';
@@ -525,28 +537,92 @@ function cartaoExercicio(it) {
 }
 
 /* ---------- boneco ---------- */
+const PARTES = [["gorro", "Gorro"], ["fone", "Fone"], ["barba", "Barba"], ["tatuagem", "Tatuagem"], ["relogio", "Relógio"]];
+let humorDia = null;   // dia (AAAA-MM-DD) em exibição
+let humorPrev = null;  // humor escolhido e ainda não salvo
+
+function ultimos7() {
+  const out = [];
+  for (let k = 6; k >= 0; k--) { const d = new Date(); d.setDate(d.getDate() - k); out.push(d); }
+  return out;
+}
+function humorDoDia() { return humorPrev || dados.humor[humorDia || iso(new Date())] || "normal"; }
+
+function swatches(id, lista, atual, aoEscolher) {
+  const box = $(id);
+  box.innerHTML = "";
+  lista.forEach((cor, i) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.style.background = cor;
+    b.className = i === atual ? "sel" : "";
+    b.setAttribute("aria-label", id.replace("sw", "") + " " + (i + 1));
+    b.onclick = () => { aoEscolher(i); salvar(); renderAvatar(); };
+    box.appendChild(b);
+  });
+}
+
 function renderAvatar() {
+  if (!humorDia) humorDia = iso(new Date());
   const ins = calcularInsights(dados);
   const m = simCintura === null ? dados.medidas : Object.assign({}, dados.medidas, { cintura: simCintura });
   const prog = simCintura === null ? ins.progresso : calcularInsights(Object.assign({}, dados, { medidas: m })).progresso;
-  $("avSvg").innerHTML = desenharAvatar(m, dados.medidasBase, {
-    ampliar: dados.avatar.ampliar, pele: dados.avatar.pele, semCamiseta: dados.avatar.semCamiseta, progresso: prog,
-  });
+  const hm = humorDoDia();
+  $("avSvg").innerHTML = desenharAvatar(m, dados.medidasBase, Object.assign({}, dados.avatar, { progresso: prog, humor: hm }));
+  $("avSvg").parentElement.style.setProperty("--glow", HUMORES[hm].cor);
   $("avStage").textContent = ins.estagio;
   $("avShirt").checked = dados.avatar.semCamiseta;
   $("avAmp").checked = dados.avatar.ampliar;
 
-  const sk = $("avSkin");
-  sk.innerHTML = "";
-  PELES.forEach((cor, i) => {
+  // humor: sete últimos dias, escolha e salvar
+  const dias = $("humorDays");
+  dias.innerHTML = "";
+  ultimos7().forEach((d) => {
+    const k = iso(d);
     const b = document.createElement("button");
     b.type = "button";
-    b.style.background = cor;
-    b.className = i === dados.avatar.pele ? "sel" : "";
-    b.setAttribute("aria-label", "Tom de pele " + (i + 1));
-    b.onclick = () => { dados.avatar.pele = i; salvar(); renderAvatar(); };
-    sk.appendChild(b);
+    b.className = "hday" + (k === humorDia ? " sel" : "") + (k === iso(new Date()) ? " today" : "");
+    const salvo = dados.humor[k];
+    b.innerHTML = "<span></span><i></i>";
+    b.querySelector("span").textContent = DIAS_CURTOS[indiceDia(d)];
+    b.querySelector("i").textContent = salvo ? HUMORES[salvo].emoji : "·";
+    b.onclick = () => { humorDia = k; humorPrev = null; renderAvatar(); };
+    dias.appendChild(b);
   });
+  const pick = $("humorPick");
+  pick.innerHTML = "";
+  Object.keys(HUMORES).forEach((k) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = k === hm ? "sel" : "";
+    b.innerHTML = "<i></i><span></span>";
+    b.querySelector("i").textContent = HUMORES[k].emoji;
+    b.querySelector("span").textContent = HUMORES[k].rot;
+    b.onclick = () => { humorPrev = k; renderAvatar(); };
+    pick.appendChild(b);
+  });
+  const salvoHoje = dados.humor[humorDia];
+  const rotDia = humorDia === iso(new Date()) ? "hoje" : humorDia.split("-").reverse().slice(0, 2).join("/");
+  $("humorHint").textContent = humorPrev && humorPrev !== salvoHoje ? "não salvo · " + rotDia : salvoHoje ? "salvo · " + rotDia : "sem humor · " + rotDia;
+  $("humorSave").textContent = "SALVAR HUMOR (" + rotDia.toUpperCase() + ")";
+
+  // aparência
+  const partes = $("avParts");
+  partes.innerHTML = "";
+  PARTES.forEach(([k, rot]) => {
+    const lb = document.createElement("label");
+    lb.className = "sw";
+    const inp = document.createElement("input");
+    inp.type = "checkbox"; inp.checked = dados.avatar[k];
+    inp.onchange = () => { dados.avatar[k] = inp.checked; salvar(); renderAvatar(); };
+    const sp = document.createElement("span"); sp.textContent = rot;
+    lb.appendChild(inp); lb.appendChild(sp);
+    partes.appendChild(lb);
+  });
+  swatches("swPele", PELES, dados.avatar.pele, (i) => { dados.avatar.pele = i; });
+  swatches("swCabelo", CABELOS, dados.avatar.cabelo, (i) => { dados.avatar.cabelo = i; });
+  swatches("swCamisa", CAMISAS.map((c) => c.fill), dados.avatar.camisa, (i) => { dados.avatar.camisa = i; });
+  swatches("swGorro", GORROS.map((c) => c.fill), dados.avatar.gorroCor, (i) => { dados.avatar.gorroCor = i; });
 
   const sim = $("avSim");
   const mn = Math.floor(Math.min(dados.metaCintura, dados.medidas.cintura) - 5);
@@ -591,6 +667,25 @@ function renderAvatar() {
   CAMPOS_MEDIDA.forEach(([k]) => { const i = $("mf_" + k); if (document.activeElement !== i) i.value = dados.medidas[k]; });
 }
 
+$("humorSave").onclick = () => {
+  if (!humorPrev && !dados.humor[humorDia]) { aviso("Escolha um humor primeiro"); return; }
+  if (humorPrev) dados.humor[humorDia] = humorPrev;
+  humorPrev = null;
+  salvar();
+  renderAvatar();
+  aviso("Humor salvo: " + HUMORES[dados.humor[humorDia]].rot);
+};
+$("humorClear").onclick = () => { delete dados.humor[humorDia]; humorPrev = null; salvar(); renderAvatar(); aviso("Humor do dia removido"); };
+
+// exporta a aba atual em PDF: o navegador abre a janela de impressão (destino "Salvar como PDF")
+function exportarPdf() {
+  $("printDate").textContent = "· " + new Date().toLocaleDateString("pt-BR");
+  $("printView").textContent = "· " + { Hoje: "Hoje", Treinos: "Treinos", Avatar: "LZ", Backup: "Backup" }[abaAtual];
+  aviso("Na janela, escolha “Salvar como PDF”");
+  setTimeout(() => window.print(), 350);
+}
+$("btnPdf").onclick = exportarPdf;
+$("btnPdf2").onclick = exportarPdf;
 $("avShirt").onchange = (e) => { dados.avatar.semCamiseta = e.target.checked; salvar(); renderAvatar(); };
 $("avAmp").onchange = (e) => { dados.avatar.ampliar = e.target.checked; salvar(); renderAvatar(); };
 $("avSim").oninput = (e) => { simCintura = parseFloat(e.target.value); renderAvatar(); };
@@ -618,7 +713,7 @@ $("avSave").onclick = () => {
   dados.proximaMedicao = iso(prox);
   simCintura = null;
   render();
-  aviso("Medidas salvas. O boneco já mudou");
+  aviso("Medidas salvas. O LZ já mudou");
 };
 
 /* ---------- backup ---------- */
