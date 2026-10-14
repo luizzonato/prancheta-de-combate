@@ -677,15 +677,53 @@ $("humorSave").onclick = () => {
 };
 $("humorClear").onclick = () => { delete dados.humor[humorDia]; humorPrev = null; salvar(); renderAvatar(); aviso("Humor do dia removido"); };
 
-// exporta a aba atual em PDF: o navegador abre a janela de impressão (destino "Salvar como PDF")
-function exportarPdf() {
-  $("printDate").textContent = "· " + new Date().toLocaleDateString("pt-BR");
-  $("printView").textContent = "· " + { Hoje: "Hoje", Treinos: "Treinos", Avatar: "LZ", Backup: "Backup" }[abaAtual];
-  aviso("Na janela, escolha “Salvar como PDF”");
-  setTimeout(() => window.print(), 350);
+// Relatório em PDF: gera o arquivo e abre o compartilhar do celular (WhatsApp); sem compartilhar, baixa
+let pdfPronto = null;
+function baixarArquivo(file) {
+  const url = URL.createObjectURL(file);
+  const a = document.createElement("a");
+  a.href = url; a.download = file.name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
 }
-$("btnPdf").onclick = exportarPdf;
-$("btnPdf2").onclick = exportarPdf;
+async function compartilharArquivo(file) {
+  await navigator.share({ files: [file], title: "Prancheta de Combate · LZ", text: "Meu relatório da semana" });
+}
+async function exportarPdf(modo) {
+  const botoes = [$("btnPdf"), $("btnPdfShare"), $("btnPdfDown")];
+  botoes.forEach((b) => { b.disabled = true; });
+  aviso("Gerando PDF…");
+  try {
+    const blob = await gerarRelatorioPdf({ humor: humorDoDia() });
+    const file = new File([blob], "prancheta-lz-" + iso(new Date()) + ".pdf", { type: "application/pdf" });
+    const podeEnviar = modo === "enviar" && navigator.canShare && navigator.canShare({ files: [file] });
+    if (podeEnviar) {
+      try { await compartilharArquivo(file); return; }
+      catch (e) {
+        if (e && e.name === "AbortError") return; // fechou a janela de compartilhar
+        // alguns navegadores só aceitam compartilhar direto no toque: deixa o arquivo pronto
+        pdfPronto = file;
+        $("btnPdfReady").hidden = false;
+        irParaAba("Backup");
+        aviso("PDF pronto. Toque em ENVIAR");
+        return;
+      }
+    }
+    baixarArquivo(file);
+    aviso(modo === "enviar" ? "Este aparelho não compartilha arquivos: PDF baixado" : "PDF baixado");
+  } catch (e) {
+    aviso("Não consegui gerar o PDF");
+  } finally {
+    botoes.forEach((b) => { b.disabled = false; });
+  }
+}
+$("btnPdf").onclick = () => exportarPdf("enviar");
+$("btnPdfShare").onclick = () => exportarPdf("enviar");
+$("btnPdfDown").onclick = () => exportarPdf("baixar");
+$("btnPdfReady").onclick = async () => {
+  if (!pdfPronto) return;
+  try { await compartilharArquivo(pdfPronto); } catch (e) { if (!e || e.name !== "AbortError") { baixarArquivo(pdfPronto); aviso("PDF baixado"); } }
+};
 $("avShirt").onchange = (e) => { dados.avatar.semCamiseta = e.target.checked; salvar(); renderAvatar(); };
 $("avAmp").onchange = (e) => { dados.avatar.ampliar = e.target.checked; salvar(); renderAvatar(); };
 $("avSim").oninput = (e) => { simCintura = parseFloat(e.target.value); renderAvatar(); };

@@ -187,9 +187,13 @@
         <p class="muted small bk-last" id="bkLast"></p>
       </section>
       <section class="card">
-        <div class="card-head"><h3>EXPORTAR EM PDF</h3></div>
-        <p class="muted small bk-text">Gera um PDF da aba que você está vendo (Hoje, Treinos ou LZ). Na janela que abrir, escolha “Salvar como PDF” como destino.</p>
-        <div class="bk-actions"><button class="btn purple" id="btnPdf2" type="button">EXPORTAR PÁGINA EM PDF</button></div>
+        <div class="card-head"><h3>RELATÓRIO EM PDF</h3><span class="muted small">pronto para enviar</span></div>
+        <p class="muted small bk-text">Gera um arquivo PDF com o seu resumo da semana: LZ, humor, medidas, meta de cintura, gráfico, hábitos e cargas dos treinos. O botão de enviar abre o compartilhar do celular (WhatsApp, e-mail, etc.).</p>
+        <div class="bk-actions">
+          <button class="btn lime" id="btnPdfShare" type="button">ENVIAR PDF (WHATSAPP)</button>
+          <button class="btn" id="btnPdfDown" type="button">BAIXAR PDF</button>
+        </div>
+        <div class="bk-actions"><button class="btn purple" id="btnPdfReady" type="button" hidden>PDF PRONTO · TOQUE PARA ENVIAR</button></div>
       </section>
       <section class="card">
         <div class="card-head"><h3>COPIAR E COLAR</h3><span class="muted small">sem arquivo</span></div>
@@ -218,6 +222,8 @@
   <canvas id="fx" aria-hidden="true"></canvas>
   <script src="treinos.js"></script>
   <script src="avatar.js"></script>
+  <script src="vendor/jspdf.umd.min.js"></script>
+  <script src="relatorio.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
