@@ -160,3 +160,70 @@ h1 em { font-style: normal; color: var(--lime); }
   .measures { grid-template-columns: repeat(2, 1fr); }
 }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+/* ---------- abas ---------- */
+.view[hidden] { display: none; }
+.view { display: grid; gap: 16px; }
+#app { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
+.tabbar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; display: flex; justify-content: center; gap: 6px;
+  padding: 8px 12px calc(8px + env(safe-area-inset-bottom)); background: rgba(10,13,11,.88); backdrop-filter: blur(14px);
+  border-top: 1px solid var(--line);
+}
+.tabbar button { flex: 1; max-width: 240px; display: grid; justify-items: center; gap: 2px; padding: 8px 0; border-radius: 14px; background: transparent; color: var(--muted); transition: all .15s; }
+.tabbar button i { font-style: normal; font-size: 18px; line-height: 1; }
+.tabbar button span { font-size: 10px; letter-spacing: .12em; font-weight: 800; }
+.tabbar button.on { color: var(--lime); background: rgba(198,255,61,.09); }
+.tabbar button:active { transform: scale(.94); }
+
+.cardio-line { margin-top: 6px !important; font-size: 12px; color: var(--amber); font-weight: 700; }
+.link-btn { margin-top: 12px; background: none; color: var(--lime); font-weight: 800; font-size: 11px; letter-spacing: .1em; padding: 6px 0; text-align: left; }
+.link-btn:hover { text-decoration: underline; }
+
+/* ---------- ficha de treinos ---------- */
+.ficha-tabs { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+.ficha-tabs button { padding: 12px 0; border-radius: 14px; background: var(--card); border: 1px solid var(--line); font-family: var(--display); font-size: 18px; letter-spacing: .04em; color: var(--muted); transition: all .15s; }
+.ficha-tabs button.sel { color: #0a0d0b; background: var(--lime); border-color: var(--lime); box-shadow: 0 8px 22px rgba(198,255,61,.18); }
+.ficha-tabs button.hoje::after { content: " •"; color: var(--orange); }
+.ficha-tabs button.sel.hoje::after { color: #0a0d0b; }
+.ficha-head h2 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 26px; text-transform: uppercase; line-height: 1.05; }
+.ficha-head p { margin: 4px 0 0; font-size: 13px; color: var(--muted); }
+.ficha-head .cardio-line { color: var(--amber); }
+.fase { margin-top: 18px; }
+.fase-h { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+.fase-h b { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--lime); }
+.fase-h span { font-size: 11px; color: var(--muted); white-space: nowrap; }
+.ex { display: grid; gap: 8px; padding: 12px; border-radius: 16px; background: var(--bg2); border: 1px solid var(--line); margin-bottom: 8px; transition: border-color .2s, background .2s; }
+.ex.done { border-color: rgba(198,255,61,.5); background: linear-gradient(90deg, rgba(198,255,61,.09), var(--bg2)); }
+.ex-top { display: flex; gap: 10px; align-items: flex-start; }
+.ex-top .box { flex: none; width: 26px; height: 26px; border-radius: 8px; border: 2px solid #3a4a3d; display: grid; place-content: center; color: transparent; font-weight: 900; font-size: 14px; background: none; padding: 0; transition: all .2s; }
+.ex.done .ex-top .box { background: var(--lime); border-color: var(--lime); color: #0a0d0b; }
+.ex-name { flex: 1; font-weight: 700; font-size: 15px; line-height: 1.25; }
+.ex-series { flex: none; font-size: 11px; font-weight: 800; padding: 4px 8px; border-radius: 999px; background: rgba(255,90,31,.12); color: #ffb08f; border: 1px solid rgba(255,90,31,.35); white-space: nowrap; }
+.ex-note { margin: 0; font-size: 12px; color: var(--muted); line-height: 1.4; }
+.ex-bottom { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.carga { display: flex; align-items: center; gap: 6px; }
+.carga label { font-size: 10px; letter-spacing: .1em; font-weight: 800; color: var(--muted); }
+.carga input { width: 84px; padding: 9px 10px; border-radius: 10px; background: var(--card); border: 1px solid var(--line); text-align: right; font-family: var(--display); font-size: 18px; outline: none; }
+.carga input:focus { border-color: var(--lime); }
+.carga em { font-style: normal; font-size: 12px; color: var(--muted); }
+.yt { font-size: 12px; font-weight: 800; color: var(--lime); text-decoration: none; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line); }
+.yt:hover { border-color: var(--lime); }
+.limpar { margin-top: 6px; background: none; color: var(--muted); font-size: 12px; text-decoration: underline; padding: 6px 0; }
+.protocolo { display: grid; gap: 8px; }
+.protocolo div { padding: 12px; border-radius: 14px; background: var(--bg2); border: 1px solid var(--line); }
+.protocolo b { display: block; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--orange); margin-bottom: 4px; }
+.protocolo span { font-size: 13px; line-height: 1.45; color: #cfd9cc; }
+
+/* ---------- backup ---------- */
+.bk-text { margin: 0 0 12px; line-height: 1.5; }
+.bk-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.btn { flex: 1; min-width: 150px; padding: 14px 12px; border-radius: 14px; background: var(--bg2); border: 1px solid var(--line); font-weight: 800; font-size: 12px; letter-spacing: .08em; transition: transform .12s, border-color .15s; }
+.btn:active { transform: scale(.96); }
+.btn:hover { border-color: var(--lime); }
+.btn.lime { background: var(--lime); color: #0a0d0b; border-color: var(--lime); }
+.btn.purple { background: var(--purple); color: #140a2a; border-color: var(--purple); }
+.bk-area { width: 100%; margin-top: 12px; padding: 12px; border-radius: 12px; background: var(--bg2); border: 1px solid var(--line); color: var(--text); font-family: ui-monospace, monospace; font-size: 12px; resize: vertical; outline: none; }
+.bk-area:focus { border-color: var(--purple); }
+.bk-last { margin: 12px 0 0; }
+@media (max-width: 420px) { .ex-bottom { flex-wrap: wrap; } }

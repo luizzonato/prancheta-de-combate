@@ -28,6 +28,9 @@ const PADRAO = () => ({
   proximaMedicao: "2026-10-27",
   medidas: { peso: 100, cintura: 108, cinturaBase: 108, peito: 114, quadril: 108, ombro: 54, biceps: 41.5, braco: 144, coxa: 66 },
   historico: [{ data: "2026-10-12", cintura: 108, peso: 100 }],
+  cargas: cargasPadrao(),
+  feitos: {},
+  ultimoBackup: null,
 });
 
 /* ---------- datas ---------- */
@@ -51,22 +54,59 @@ function dataDoIndice(i) {
 /* ---------- estado ---------- */
 let dados = carregar();
 let sel = indiceDia(new Date());
+let abaAtual = "Hoje";
+let fichaSel = FICHA_DO_DIA[sel];
+
+function ehObj(x) { return !!x && typeof x === "object" && !Array.isArray(x); }
+function num(x, pad) { return typeof x === "number" && isFinite(x) ? x : pad; }
+
+// aceita dados do localStorage ou de um backup: valida, completa o que faltar e descarta lixo
+function normalizar(d) {
+  const base = PADRAO();
+  if (!ehObj(d) || !Array.isArray(d.habitos)) return base;
+  const out = {
+    semana: typeof d.semana === "string" ? d.semana : base.semana,
+    habitos: d.habitos
+      .filter((h) => ehObj(h) && typeof h.nome === "string" && h.nome.trim())
+      .slice(0, 60)
+      .map((h, i) => ({
+        id: num(h.id, i + 1),
+        nome: h.nome.trim().slice(0, 80),
+        checks: Array.from({ length: 7 }, (_, k) => !!(Array.isArray(h.checks) && h.checks[k])),
+      })),
+    log: {},
+    proximaMedicao: /^\d{4}-\d{2}-\d{2}$/.test(d.proximaMedicao) ? d.proximaMedicao : base.proximaMedicao,
+    medidas: {},
+    historico: [],
+    cargas: {},
+    feitos: {},
+    ultimoBackup: typeof d.ultimoBackup === "string" ? d.ultimoBackup : null,
+  };
+  if (ehObj(d.log)) Object.keys(d.log).forEach((k) => { if (/^\d{4}-\d{2}-\d{2}$/.test(k)) out.log[k] = Math.max(0, Math.min(100, num(d.log[k], 0))); });
+  Object.keys(base.medidas).forEach((k) => { out.medidas[k] = num(ehObj(d.medidas) ? d.medidas[k] : undefined, base.medidas[k]); });
+  if (Array.isArray(d.historico)) {
+    out.historico = d.historico
+      .filter((r) => ehObj(r) && /^\d{4}-\d{2}-\d{2}$/.test(r.data))
+      .slice(-200)
+      .map((r) => ({ data: r.data, cintura: num(r.cintura, 0), peso: num(r.peso, 0) }));
+  } else out.historico = base.historico;
+  out.cargas = ehObj(d.cargas) ? {} : base.cargas;
+  if (ehObj(d.cargas)) Object.keys(d.cargas).forEach((k) => { if (typeof d.cargas[k] === "string" || typeof d.cargas[k] === "number") out.cargas[k] = String(d.cargas[k]).slice(0, 12); });
+  if (ehObj(d.feitos)) Object.keys(d.feitos).forEach((k) => { if (d.feitos[k] === true) out.feitos[k] = true; });
+  // virou a semana: marcações zeram, o log de % continua guardando a sequência
+  const atual = chaveSemana(new Date());
+  if (out.semana !== atual) {
+    out.habitos.forEach((h) => { h.checks = [false, false, false, false, false, false, false]; });
+    out.feitos = {};
+    out.semana = atual;
+  }
+  return out;
+}
 
 function carregar() {
   let d = null;
   try { d = JSON.parse(localStorage.getItem(STORAGE_KEY)); } catch (e) { d = null; }
-  if (!d || !Array.isArray(d.habitos)) d = PADRAO();
-  d.log = d.log || {};
-  d.historico = d.historico || [];
-  d.medidas = Object.assign(PADRAO().medidas, d.medidas);
-  d.proximaMedicao = d.proximaMedicao || "2026-10-27";
-  // virou a semana: as marcações zeram, o log de % continua guardando a sequência
-  const atual = chaveSemana(new Date());
-  if (d.semana !== atual) {
-    d.habitos.forEach((h) => { h.checks = [false, false, false, false, false, false, false]; });
-    d.semana = atual;
-  }
-  return d;
+  return normalizar(d);
 }
 function salvar() {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(dados)); } catch (e) { /* armazenamento indisponível */ }
@@ -135,6 +175,7 @@ function render() {
   $("dayName").textContent = DIAS[sel] + (sel === hoje ? " · hoje" : "");
   $("workoutTitle").textContent = TREINOS[sel].t;
   $("workoutSub").textContent = TREINOS[sel].s;
+  $("workoutCardio").textContent = "Cardio: " + FICHA[FICHA_DO_DIA[sel]].cardio;
   $("streak").textContent = String(sequencia());
   $("weekAvg").textContent = mediaSemana() + "%";
 
@@ -142,6 +183,8 @@ function render() {
   renderGrafico();
   renderMatriz();
   renderMedidas();
+  if (abaAtual === "Treinos") renderFicha();
+  if (abaAtual === "Backup") renderBackup();
   salvar();
 }
 
@@ -356,6 +399,169 @@ $("btnExport").onclick = () => {
   a.href = url; a.download = "habitos_cutting_semanal.csv";
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
+};
+
+/* ---------- abas ---------- */
+function irParaAba(nome) {
+  abaAtual = nome;
+  ["Hoje", "Treinos", "Backup"].forEach((n) => { $("view" + n).hidden = n !== nome; });
+  document.querySelectorAll("#tabbar button").forEach((b) => b.classList.toggle("on", b.dataset.tab === nome));
+  if (nome === "Treinos") renderFicha();
+  if (nome === "Backup") renderBackup();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+document.querySelectorAll("#tabbar button").forEach((b) => { b.onclick = () => irParaAba(b.dataset.tab); });
+$("btnAbrirFicha").onclick = () => { fichaSel = FICHA_DO_DIA[sel]; irParaAba("Treinos"); };
+
+/* ---------- ficha de treinos ---------- */
+function renderFicha() {
+  const tabs = $("fichaTabs");
+  tabs.innerHTML = "";
+  const hojeKey = FICHA_DO_DIA[indiceDia(new Date())];
+  ORDEM_FICHA.forEach((k) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.textContent = FICHA[k].tab;
+    b.className = (k === fichaSel ? "sel" : "") + (k === hojeKey ? " hoje" : "");
+    b.onclick = () => { fichaSel = k; renderFicha(); };
+    tabs.appendChild(b);
+  });
+
+  const f = FICHA[fichaSel];
+  const card = $("fichaCard");
+  card.innerHTML = "";
+  const head = document.createElement("div");
+  head.className = "ficha-head";
+  head.innerHTML = "<h2></h2><p></p><p class=\"cardio-line\"></p>";
+  head.querySelector("h2").textContent = f.titulo;
+  head.children[1].textContent = f.sub;
+  head.children[2].textContent = "Cardio: " + f.cardio;
+  card.appendChild(head);
+
+  f.fases.forEach((fase) => {
+    const sec = document.createElement("div");
+    sec.className = "fase";
+    const h = document.createElement("div");
+    h.className = "fase-h";
+    h.innerHTML = "<b></b><span></span>";
+    h.querySelector("b").textContent = fase.nome;
+    h.querySelector("span").textContent = fase.descanso ? "descanso " + fase.descanso : "";
+    sec.appendChild(h);
+    fase.itens.forEach((it) => sec.appendChild(cartaoExercicio(it)));
+    card.appendChild(sec);
+  });
+
+  const lim = document.createElement("button");
+  lim.type = "button";
+  lim.className = "limpar";
+  lim.textContent = "Limpar marcações deste treino";
+  lim.onclick = () => {
+    f.fases.forEach((fase) => fase.itens.forEach((it) => { delete dados.feitos[it.id]; }));
+    salvar();
+    renderFicha();
+  };
+  card.appendChild(lim);
+  $("protocolo").innerHTML = "";
+  PROTOCOLO_DIARIO.forEach(([t, d]) => {
+    const div = document.createElement("div");
+    div.innerHTML = "<b></b><span></span>";
+    div.querySelector("b").textContent = t;
+    div.querySelector("span").textContent = d;
+    $("protocolo").appendChild(div);
+  });
+}
+
+function cartaoExercicio(it) {
+  const feito = !!dados.feitos[it.id];
+  const el = document.createElement("div");
+  el.className = "ex" + (feito ? " done" : "");
+  el.innerHTML =
+    '<div class="ex-top"><button type="button" class="box" aria-label="Marcar como feito">✓</button><span class="ex-name"></span><span class="ex-series"></span></div>' +
+    '<p class="ex-note"></p>' +
+    '<div class="ex-bottom"><div class="carga"><label>CARGA</label><input type="text" inputmode="decimal" maxlength="12" placeholder="—" /><em></em></div><a class="yt" target="_blank" rel="noopener noreferrer">▶ EXECUÇÃO</a></div>';
+  el.querySelector(".ex-name").textContent = it.nome;
+  el.querySelector(".ex-series").textContent = it.series;
+  el.querySelector(".ex-note").textContent = it.nota;
+  el.querySelector("em").textContent = it.un;
+  el.querySelector(".yt").href = YT + it.q;
+  const box = el.querySelector(".box");
+  box.setAttribute("aria-pressed", feito ? "true" : "false");
+  box.onclick = () => {
+    if (dados.feitos[it.id]) delete dados.feitos[it.id]; else dados.feitos[it.id] = true;
+    if (navigator.vibrate) navigator.vibrate(12);
+    salvar();
+    renderFicha();
+  };
+  const inp = el.querySelector("input");
+  inp.value = dados.cargas[it.id] || "";
+  inp.oninput = () => {
+    // limpa o que não é número, vírgula ou ponto
+    const v = inp.value.replace(/[^0-9.,]/g, "");
+    if (v !== inp.value) inp.value = v;
+    if (v) dados.cargas[it.id] = v; else delete dados.cargas[it.id];
+    salvar();
+  };
+  inp.onchange = () => aviso("Carga salva: " + it.nome.split(" (")[0] + (inp.value ? " · " + inp.value + " " + it.un : ""));
+  return el;
+}
+
+/* ---------- backup ---------- */
+function montarBackup() {
+  return JSON.stringify({ app: "prancheta-de-combate", versao: 2, exportadoEm: new Date().toISOString(), dados }, null, 2);
+}
+function marcarBackup() {
+  dados.ultimoBackup = new Date().toISOString();
+  salvar();
+  renderBackup();
+}
+function renderBackup() {
+  const u = dados.ultimoBackup ? new Date(dados.ultimoBackup).toLocaleString("pt-BR") : null;
+  $("bkLast").textContent = u ? "Último backup exportado: " + u : "Nenhum backup exportado ainda neste aparelho.";
+}
+function importarTexto(txt) {
+  let obj;
+  try { obj = JSON.parse(txt); } catch (e) { aviso("Arquivo inválido: não é um backup"); return; }
+  const payload = ehObj(obj) && obj.app === "prancheta-de-combate" ? obj.dados : null;
+  if (!ehObj(payload) || !Array.isArray(payload.habitos)) { aviso("Arquivo inválido: não é um backup da Prancheta"); return; }
+  const novo = normalizar(payload);
+  if (!confirm("Substituir TODOS os dados deste aparelho pelo backup (" + novo.habitos.length + " metas)? Isso não pode ser desfeito.")) return;
+  dados = novo;
+  salvar();
+  render();
+  aviso("Backup importado");
+}
+
+$("btnBackupExport").onclick = () => {
+  const blob = new Blob([montarBackup()], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "prancheta-backup-" + iso(new Date()) + ".json";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  marcarBackup();
+  aviso("Backup exportado");
+};
+$("btnBackupImport").onclick = () => $("fileImport").click();
+$("fileImport").onchange = (e) => {
+  const f = e.target.files && e.target.files[0];
+  e.target.value = "";
+  if (!f) return;
+  if (f.size > 2 * 1024 * 1024) { aviso("Arquivo grande demais"); return; }
+  const r = new FileReader();
+  r.onload = () => importarTexto(String(r.result));
+  r.onerror = () => aviso("Não consegui ler o arquivo");
+  r.readAsText(f);
+};
+$("btnBackupCopy").onclick = async () => {
+  const txt = montarBackup();
+  try { await navigator.clipboard.writeText(txt); marcarBackup(); aviso("Código copiado. Cole no outro aparelho"); }
+  catch (e) { $("bkPaste").value = txt; $("bkPaste").select(); aviso("Selecione e copie o texto abaixo"); }
+};
+$("btnBackupPaste").onclick = () => {
+  const t = $("bkPaste").value.trim();
+  if (!t) { aviso("Cole o código primeiro"); return; }
+  importarTexto(t);
+  $("bkPaste").value = "";
 };
 
 /* ---------- toast e confete ---------- */
