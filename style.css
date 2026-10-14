@@ -343,3 +343,45 @@ h1 { font-size: clamp(26px, 7.6vw, 46px); }
   .day.sel, .hday.sel { background: #e8ffa0 !important; border-color: #3f7d00 !important; }
   .day.sel .dn, .hday.sel span { color: #14181a !important; }
 }
+
+/* ---------- tema claro ---------- */
+html[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f2f5ee; --bg2: #e9eee4; --card: #ffffff; --line: #d3dbcb; --text: #14181a; --muted: #5a665c;
+  --lime: #3f8a00; --lime-d: #2f6b00; --amber: #a86400; --orange: #d44800; --purple: #6a3fcf;
+}
+html[data-theme="light"] body {
+  background: radial-gradient(900px 420px at 85% -10%, rgba(120,190,0,.16), transparent 60%),
+    radial-gradient(700px 380px at -10% 20%, rgba(255,120,40,.08), transparent 60%), var(--bg);
+  background-attachment: fixed;
+}
+html[data-theme="light"] .tabbar { background: rgba(255,255,255,.92); }
+html[data-theme="light"] .day.sel, html[data-theme="light"] .hday.sel, html[data-theme="light"] .humor-pick button.sel { background: #e6f4cf; }
+html[data-theme="light"] .mission.done { background: linear-gradient(90deg, rgba(63,138,0,.14), rgba(63,138,0,.03)); border-color: rgba(63,138,0,.5); }
+html[data-theme="light"] .ex.done { background: linear-gradient(90deg, rgba(63,138,0,.12), var(--bg2)); border-color: rgba(63,138,0,.45); }
+html[data-theme="light"] .mission.done .nm { color: #5f6e5f; }
+html[data-theme="light"] .mission .box, html[data-theme="light"] .ex-top .box { border-color: #b4bfad; }
+html[data-theme="light"] .mission.done .box, html[data-theme="light"] .ex.done .ex-top .box,
+html[data-theme="light"] .btn.lime, html[data-theme="light"] .add button, html[data-theme="light"] .ficha-tabs button.sel,
+html[data-theme="light"] .toast { color: #fff; }
+html[data-theme="light"] .btn.purple, html[data-theme="light"] .measure-form button { color: #fff; }
+html[data-theme="light"] .protocolo span { color: #3b463d; }
+html[data-theme="light"] .chip.fire, html[data-theme="light"] .ex-series { color: #b84a1c; }
+html[data-theme="light"] .matrix td.hn button { color: #8a968a; }
+html[data-theme="light"] .foot { color: var(--muted); }
+html[data-theme="light"] .hero { background: linear-gradient(135deg, rgba(63,138,0,.08), transparent 55%), var(--card); }
+html[data-theme="light"] .ring-fg { filter: none; }
+html[data-theme="light"] .cell.on { box-shadow: none; }
+html[data-theme="light"] .av-svg svg [stroke="#c6ff3d"] { stroke: #3f8a00; }
+html[data-theme="light"] .chart rect[fill="#c6ff3d"] { fill: #3f8a00; }
+html[data-theme="light"] .chart rect[fill="#4a6b2a"] { fill: #9cbf73; }
+html[data-theme="light"] .chart text[style*="c6ff3d"] { fill: #3f8a00 !important; }
+
+/* cabeçalho no celular: os botões descem para uma linha própria e o título respira */
+@media (max-width: 520px) {
+  .top { flex-wrap: wrap; row-gap: 10px; }
+  .brand { flex: 1 1 100%; }
+  .top-actions { flex: 1 1 100%; justify-content: flex-end; }
+  h1 { font-size: clamp(28px, 8.4vw, 46px); }
+}
+@media print { .top { flex-wrap: nowrap; } }

@@ -198,14 +198,16 @@ function render() {
   const p = pctDia(sel);
   const circ = 326.7;
   $("ringFg").style.strokeDashoffset = String(circ - (circ * p) / 100);
-  $("ringFg").style.stroke = p >= 100 ? "#ffb020" : "#c6ff3d";
+  $("ringFg").style.stroke = p >= 100 ? "var(--amber)" : "var(--lime)";
   $("ringPct").textContent = p + "%";
   $("ringCount").textContent = contDia(sel) + "/" + dados.habitos.length;
   $("dayName").textContent = DIAS[sel] + (sel === hoje ? " · hoje" : "");
   $("workoutTitle").textContent = TREINOS[sel].t;
   $("workoutSub").textContent = TREINOS[sel].s;
   $("workoutCardio").textContent = "Cardio: " + FICHA[FICHA_DO_DIA[sel]].cardio;
-  $("streak").textContent = String(sequencia());
+  const seq = sequencia();
+  $("streak").textContent = String(seq);
+  $("streakLbl").textContent = seq === 1 ? "dia de sequência" : "dias de sequência";
   $("weekAvg").textContent = mediaSemana() + "%";
 
   renderMissoes();
@@ -535,6 +537,23 @@ function cartaoExercicio(it) {
   inp.onchange = () => aviso("Carga salva: " + it.nome.split(" (")[0] + (inp.value ? " · " + inp.value + " " + it.un : ""));
   return el;
 }
+
+/* ---------- tema claro/escuro (guardado só neste aparelho) ---------- */
+function aplicarTema(t, salvarEscolha) {
+  document.documentElement.setAttribute("data-theme", t);
+  const m = document.getElementById("metaTema");
+  if (m) m.setAttribute("content", t === "light" ? "#f2f5ee" : "#0a0d0b");
+  // o ícone mostra para qual tema vai trocar
+  $("btnTema").textContent = t === "light" ? "☾" : "☀";
+  $("btnTema").title = t === "light" ? "Mudar para o tema escuro" : "Mudar para o tema claro";
+  if (salvarEscolha) { try { localStorage.setItem("prancheta_tema", t); } catch (e) { /* sem armazenamento */ } }
+}
+$("btnTema").onclick = () => {
+  const novo = document.documentElement.getAttribute("data-theme") === "light" ? "dark" : "light";
+  aplicarTema(novo, true);
+  aviso(novo === "light" ? "Tema claro" : "Tema escuro");
+};
+aplicarTema(document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark", false);
 
 /* ---------- boneco ---------- */
 const PARTES = [["gorro", "Gorro"], ["fone", "Fone"], ["barba", "Barba"], ["tatuagem", "Tatuagem"], ["relogio", "Relógio"]];

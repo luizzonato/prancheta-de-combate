@@ -3,7 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#0a0d0b" />
+  <meta name="theme-color" id="metaTema" content="#0a0d0b" />
+  <script>
+    // aplica o tema salvo antes de desenhar a tela, para não piscar
+    (function () {
+      var t = "dark";
+      try { t = localStorage.getItem("prancheta_tema") === "light" ? "light" : "dark"; } catch (e) {}
+      document.documentElement.setAttribute("data-theme", t);
+      var m = document.getElementById("metaTema");
+      if (m) m.setAttribute("content", t === "light" ? "#f2f5ee" : "#0a0d0b");
+    })();
+  </script>
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Prancheta" />
@@ -29,6 +39,7 @@
         </div>
       </div>
       <div class="top-actions">
+        <button class="icon-btn" id="btnTema" type="button" aria-label="Alternar tema claro ou escuro" title="Tema claro/escuro">☀</button>
         <button class="icon-btn txt" id="btnPdf" aria-label="Exportar página em PDF" title="Exportar página em PDF">PDF</button>
         <button class="icon-btn" id="btnExport" aria-label="Exportar CSV" title="Exportar CSV">⇩</button>
         <button class="icon-btn danger" id="btnReset" aria-label="Zerar semana" title="Zerar semana">↺</button>
@@ -56,7 +67,7 @@
           <p class="muted" id="workoutSub">—</p>
           <p class="cardio-line" id="workoutCardio"></p>
           <div class="chips">
-            <span class="chip fire"><b id="streak">0</b> dias de sequência</span>
+            <span class="chip fire"><b id="streak">0</b> <span id="streakLbl">dias de sequência</span></span>
             <span class="chip"><b id="weekAvg">0%</b> na semana</span>
           </div>
           <button class="link-btn" id="btnAbrirFicha" type="button">ABRIR FICHA DO TREINO →</button>
